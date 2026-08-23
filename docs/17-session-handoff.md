@@ -22,7 +22,8 @@
 
 ## 최근 앱 아이콘 작업 요약
 
-- 배포 빌드를 막던 미추적 `images/characters/gamjabot/final/spritesheet-extended.webp` 참조를 Git에 포함된 `references/base-spritesheet-extended.png`로 교체했다. 2026-08-23 NSIS 빌드가 통과했고 `src-tauri/target/release/bundle/nsis/Desktop Pet MVP_0.1.0_x64-setup.exe`가 생성됐다.
+- 배포 빌드를 막던 미추적 `images/characters/gamjabot/final/spritesheet-extended.webp` 참조를 Git에 포함된 `references/base-spritesheet-extended.png`로 교체했다.
+- 사용자 표시 제품명과 창 제목, Node/Rust 패키지명을 `migam desktop`으로 통일했다. release 실행 파일은 `src-tauri/target/release/migam-desktop.exe`, NSIS 설치 파일은 `src-tauri/target/release/bundle/nsis/migam desktop_0.1.0_x64-setup.exe`로 생성된다. 기존 Tauri identifier는 저장 데이터와 설치 업그레이드 호환을 위해 유지한다.
 - `bundle.windows.nsis.installerIcon`과 `uninstallerIcon`을 `images/app/icon.ico`로 지정해 NSIS 기본 다운로드 아이콘 대신 청록색 감자봇 얼굴이 표시되도록 했다.
 - release `main.rs`에 Windows GUI subsystem 속성을 적용했다. 새 release EXE의 PE subsystem 값 2를 확인했으며 설치판 실행 시 검은 터미널 창이 더 이상 생성되지 않는다.
 - 독립 투두 창의 WinDbg 분위기는 명령줄·각진 패널·파란 상태바로 유지하되, 클릭할 수 없는 File/Home/Focus/View 메뉴와 장식용 리본 및 내부 가짜 닫기 표시는 제거했다.

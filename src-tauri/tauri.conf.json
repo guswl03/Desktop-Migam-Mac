@@ -1,6 +1,6 @@
 {
   "$schema": "https://schema.tauri.app/config/2",
-  "productName": "Desktop Pet MVP",
+  "productName": "migam desktop",
   "version": "0.1.0",
   "identifier": "com.desktoppetmvp.desktop",
   "build": {
@@ -13,7 +13,7 @@
     "windows": [
       {
         "label": "pet",
-        "title": "Desktop Pet",
+        "title": "migam desktop",
         "width": 128,
         "height": 128,
         "visible": true,
@@ -26,7 +26,7 @@
       },
       {
         "label": "card",
-        "title": "Desktop Pet Kick",
+        "title": "migam desktop · Kick",
         "width": 220,
         "height": 180,
         "visible": false,
@@ -41,7 +41,7 @@
       },
       {
         "label": "timer",
-        "title": "Desktop Pet Timer",
+        "title": "migam desktop · Timer",
         "width": 156,
         "height": 76,
         "visible": false,
@@ -54,7 +54,7 @@
       },
       {
         "label": "todo",
-        "title": "감자봇 할 일",
+        "title": "migam desktop · Todo",
         "width": 460,
         "height": 640,
         "minWidth": 380,
@@ -64,7 +64,7 @@
       },
       {
         "label": "settings",
-        "title": "Desktop Pet Settings",
+        "title": "migam desktop · Settings",
         "width": 720,
         "height": 620,
         "visible": false,
@@ -72,7 +72,7 @@
       },
       {
         "label": "gamcha-notice",
-        "title": "GAMCHA Reward",
+        "title": "migam desktop · GAMCHA Reward",
         "width": 196,
         "height": 82,
         "visible": false,
@@ -85,7 +85,7 @@
       },
       {
         "label": "gamcha",
-        "title": "GAMCHA!",
+        "title": "migam desktop · GAMCHA!",
         "width": 380,
         "height": 360,
         "visible": false,
@@ -98,7 +98,7 @@
       },
       {
         "label": "pet-menu",
-        "title": "Desktop Pet Command",
+        "title": "migam desktop · Command",
         "width": 292,
         "height": 490,
         "visible": false,
@@ -110,7 +110,7 @@
       },
       {
         "label": "photo-delivery",
-        "title": "Gamza Photo Delivery",
+        "title": "migam desktop · Photo Delivery",
         "width": 640,
         "height": 360,
         "visible": false,

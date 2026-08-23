@@ -17,9 +17,9 @@ export async function mountTodo(container: HTMLElement): Promise<() => void> {
   container.innerHTML = `
     <main class="todo-app">
       <section class="todo-debug-document">
-        <div class="todo-pane-title"><span>DesktopPet.Todo</span></div>
+        <div class="todo-pane-title"><span>MigamDesktop.Todo</span></div>
         <div class="todo-command-line"><span>0:000&gt;</span><span>.todo /today /local</span><span class="todo-caret">_</span></div>
-        <div class="todo-app-header"><div><span class="todo-kicker">GAMJABOT TASK MANAGER</span><h1>오늘 할 일</h1></div><strong id="todo-summary">0 / 0</strong></div>
+        <div class="todo-app-header"><div><span class="todo-kicker">MIGAM DESKTOP TASK MANAGER</span><h1>오늘 할 일</h1></div><strong id="todo-summary">0 / 0</strong></div>
         <fieldset class="todo-focus-card" aria-label="현재 집중 항목"><legend>Focus Target</legend><span>지금 집중할 일</span><strong id="todo-current">선택된 할 일 없음</strong><button id="todo-start-focus" type="button">집중 시작</button></fieldset>
         <form class="todo-quick-add"><label for="todo-input">New Task</label><div><input id="todo-input" type="text" maxlength="200" autocomplete="off" placeholder="할 일을 입력하세요" aria-label="새 할 일" /><button type="submit">추가</button></div></form>
         <div class="todo-section-heading"><strong>Today</strong><button id="todo-toggle-completed" type="button">완료 숨기기</button></div>
