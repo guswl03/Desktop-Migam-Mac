@@ -1,3 +1,5 @@
+export type AccessibilityPermissionState = "granted" | "denied" | "unavailable";
+
 export interface DistractionRule {
   id: string;
   name: string;
@@ -52,4 +54,5 @@ export interface BootstrapState {
   emergencyStopped: boolean;
   emergencyShortcutAvailable: boolean;
   trayAvailable: boolean;
+  accessibilityPermission: AccessibilityPermissionState;
 }

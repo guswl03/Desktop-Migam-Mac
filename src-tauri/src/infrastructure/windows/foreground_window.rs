@@ -138,6 +138,7 @@ mod platform {
                 window_id: window as isize,
                 process_id,
                 process_name: Self::process_name(process_id)?,
+                bundle_id: None,
                 title: Self::window_title(window),
                 is_visible: unsafe { IsWindowVisible(window) != 0 },
                 is_minimized: unsafe { IsIconic(window) != 0 },

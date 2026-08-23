@@ -130,13 +130,7 @@
   },
   "bundle": {
     "active": true,
-    "targets": "all",
-    "icon": ["../images/app/icon.ico"],
-    "windows": {
-      "nsis": {
-        "installerIcon": "../images/app/icon.ico",
-        "uninstallerIcon": "../images/app/icon.ico"
-      }
-    }
+    "targets": ["app", "dmg"],
+    "icon": ["icons/icon.ico"]
   }
 }

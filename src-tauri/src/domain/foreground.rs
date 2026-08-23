@@ -3,6 +3,7 @@ pub struct WindowSnapshot {
     pub window_id: isize,
     pub process_id: u32,
     pub process_name: Option<String>,
+    pub bundle_id: Option<String>,
     pub title: Option<String>,
     pub is_visible: bool,
     pub is_minimized: bool,

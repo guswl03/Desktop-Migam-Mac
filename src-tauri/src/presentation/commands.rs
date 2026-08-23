@@ -15,6 +15,7 @@ use crate::{
         pomodoro::{PomodoroEvent, PomodoroPhase},
         settings::{ResourceResponseMode, Settings},
     },
+    infrastructure::macos::AccessibilityPermissionState,
 };
 
 #[derive(Serialize)]
@@ -24,6 +25,7 @@ pub struct BootstrapState {
     emergency_stopped: bool,
     emergency_shortcut_available: bool,
     tray_available: bool,
+    accessibility_permission: AccessibilityPermissionState,
 }
 
 #[tauri::command]
@@ -38,7 +40,20 @@ pub fn get_bootstrap_state(state: State<'_, AppState>) -> Result<BootstrapState,
         emergency_stopped: state.emergency_stopped.load(Ordering::SeqCst),
         emergency_shortcut_available: state.emergency_shortcut_available.load(Ordering::SeqCst),
         tray_available: state.tray_available.load(Ordering::SeqCst),
+        accessibility_permission: state.accessibility_permission.status(),
     })
+}
+
+#[tauri::command]
+pub fn get_accessibility_permission(state: State<'_, AppState>) -> AccessibilityPermissionState {
+    state.accessibility_permission.status()
+}
+
+#[tauri::command]
+pub fn request_accessibility_permission(
+    state: State<'_, AppState>,
+) -> AccessibilityPermissionState {
+    state.accessibility_permission.request()
 }
 
 #[tauri::command]
@@ -47,7 +62,10 @@ pub fn save_settings(
     state: State<'_, AppState>,
     settings: Settings,
 ) -> Result<Settings, String> {
-    let normalized = settings.validate().map_err(|error| error.to_string())?;
+    let mut normalized = settings.validate().map_err(|error| error.to_string())?;
+    if state.accessibility_permission.status() != AccessibilityPermissionState::Granted {
+        normalized.focus_guard.intervention_enabled = false;
+    }
     state.settings_service.save(&normalized)?;
     state
         .pomodoro_service

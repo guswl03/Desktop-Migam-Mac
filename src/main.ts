@@ -2,6 +2,7 @@ import { invoke } from "@tauri-apps/api/core";
 import { listen } from "@tauri-apps/api/event";
 import { getCurrentWindow } from "@tauri-apps/api/window";
 import type {
+  AccessibilityPermissionState,
   BootstrapState,
   DetectionState,
   DistractionRule,
@@ -9,6 +10,7 @@ import type {
   SystemMetricsState,
   ResourceResponseMode,
 } from "./contracts";
+import { permissionPresentation } from "./accessibility-permission";
 import { mountKick } from "./intervention/kick-view";
 import { mountGamcha, mountGamchaNotice } from "./gamcha/gamcha-view";
 import { costumeById } from "./costumes/catalog";
@@ -142,7 +144,7 @@ function ruleRows(rules: DistractionRule[]): string {
             <button class="danger-text" type="button" data-remove-rule="${escaped(rule.id)}">삭제</button>
           </div>
           <label><span class="setting-label-text">규칙 이름 ${settingsHelp("ruleName")}</span><input name="rule-${index}-name" type="text" maxlength="60" value="${escaped(rule.name)}" required /></label>
-          <label><span class="setting-label-text">앱 실행 파일 ${settingsHelp("processName")}</span><input name="rule-${index}-process" type="text" maxlength="120" placeholder="chrome.exe" value="${escaped(rule.processName ?? "")}" /></label>
+          <label><span class="setting-label-text">앱 이름 ${settingsHelp("processName")}</span><input name="rule-${index}-process" type="text" maxlength="120" placeholder="Google Chrome" value="${escaped(rule.processName ?? "")}" /></label>
           <label class="wide-field"><span class="setting-label-text">웹사이트 또는 창 이름 ${settingsHelp("windowTitle")}</span><input name="rule-${index}-title" type="text" maxlength="200" placeholder="YouTube" value="${escaped(rule.windowTitle ?? "")}" /></label>
           <label><span class="setting-label-text">차단 전 대기 (초) ${settingsHelp("graceSeconds")}</span><input name="rule-${index}-grace" type="number" min="1" max="600" value="${rule.graceSeconds}" required /></label>
           <label><span class="setting-label-text">다시 검사 (초) ${settingsHelp("cooldownSeconds")}</span><input name="rule-${index}-cooldown" type="number" min="5" max="3600" value="${rule.cooldownSeconds}" required /></label>
@@ -167,15 +169,17 @@ function renderSettings(
   settings: Settings,
   emergencyShortcutAvailable: boolean,
   trayAvailable: boolean,
+  accessibilityPermission: AccessibilityPermissionState,
 ): void {
   let rules = settings.focusGuard.rules.map((rule) => ({ ...rule }));
+  let permission = permissionPresentation(accessibilityPermission);
   app!.innerHTML = `
     <main class="panel settings-panel">
       <section class="debug-document">
         <div class="debug-pane-title"><span>MigamDesktop.Settings</span><span aria-hidden="true">×</span></div>
         <div class="debug-command-line" aria-hidden="true"><span>0:000&gt;</span><span>.settings /local /schema:${settings.schemaVersion}</span><span class="debug-caret">_</span></div>
         <div class="settings-heading"><div><p class="eyebrow">MIGAM DESKTOP CONFIGURATION</p><h1>설정</h1></div><span class="debug-build">LOCAL · SCHEMA ${settings.schemaVersion}</span></div>
-        ${emergencyShortcutAvailable ? "" : '<p class="warning" role="alert">Ctrl+Shift+F12 긴급 중지 단축키를 등록하지 못했습니다. 트레이의 긴급 중지 메뉴를 사용해 주세요.</p>'}
+        ${emergencyShortcutAvailable ? "" : '<p class="warning" role="alert">Command+Shift+F12 긴급 중지 단축키를 등록하지 못했습니다. 메뉴 막대의 긴급 중지 메뉴를 사용해 주세요.</p>'}
         ${trayAvailable ? "" : '<p class="warning" role="alert">시스템 트레이를 사용할 수 없습니다. 앱 창을 닫으면 복구 메뉴에 접근하지 못할 수 있습니다.</p>'}
         <form id="settings-form">
         <fieldset>
@@ -201,19 +205,21 @@ function renderSettings(
         </fieldset>
         <fieldset>
           <legend>집중 보호</legend>
-          <label class="checkbox-row"><input name="interventionEnabled" type="checkbox" ${settings.focusGuard.interventionEnabled ? "checked" : ""} ${rules.length === 0 ? "disabled" : ""} /> <span class="setting-label-text">집중 중 방해 앱 감지 ${settingsHelp("intervention")}</span></label>
+          <p id="accessibility-status" class="detection-status" role="status">${permission.label}</p>
+          ${permission.showRequest ? '<button id="request-accessibility" class="secondary" type="button">손쉬운 사용 권한 요청</button>' : ""}
+          <label class="checkbox-row"><input name="interventionEnabled" type="checkbox" ${settings.focusGuard.interventionEnabled && permission.canIntervene ? "checked" : ""} ${rules.length === 0 || !permission.canIntervene ? "disabled" : ""} /> <span class="setting-label-text">집중 중 방해 앱 감지 ${settingsHelp("intervention")}</span></label>
           <p class="muted">일치 상태가 유예 시간 동안 유지되면 왼쪽에서 네모 캐릭터가 날아와 창을 최소화합니다. 브라우저 사이트는 창 제목 문자열만 확인합니다.</p>
           <p id="detection-status" class="detection-status" role="status">집중 시작 전 · 감지 대기</p>
         </fieldset>
         <section class="rules-section" aria-labelledby="rules-heading">
           <div class="section-heading"><h2 id="rules-heading">방해 규칙</h2><button id="add-rule" class="secondary" type="button">규칙 추가</button></div>
           <div id="rule-list" class="rule-list">${ruleRows(rules)}</div>
-          <p class="muted">앱 실행 파일과 웹사이트 또는 창 이름 중 하나 이상을 입력하세요. 둘 다 입력하면 두 조건이 모두 맞아야 합니다.</p>
+          <p class="muted">앱 이름과 웹사이트 또는 창 이름 중 하나 이상을 입력하세요. 둘 다 입력하면 두 조건이 모두 맞아야 합니다.</p>
         </section>
           <div class="actions"><button type="submit">설정 적용</button><span id="save-status" role="status"></span></div>
         </form>
       </section>
-      <div class="debug-statusbar"><span>Configuration ready</span><span>Ctrl+Shift+F12 · EMERGENCY STOP</span></div>
+      <div class="debug-statusbar"><span>Configuration ready</span><span>Command+Shift+F12 · EMERGENCY STOP</span></div>
     </main>
   `;
 
@@ -224,7 +230,7 @@ function renderSettings(
   const redrawRules = (): void => {
     if (ruleList) ruleList.innerHTML = ruleRows(rules);
     if (intervention) {
-      intervention.disabled = rules.length === 0;
+      intervention.disabled = rules.length === 0 || !permission.canIntervene;
       if (rules.length === 0) intervention.checked = false;
     }
   };
@@ -241,6 +247,22 @@ function renderSettings(
     redrawRules();
   });
   const detectionStatus = document.querySelector<HTMLParagraphElement>("#detection-status");
+  document.querySelector("#request-accessibility")?.addEventListener("click", () => {
+    void invoke<AccessibilityPermissionState>("request_accessibility_permission")
+      .then((state) => {
+        permission = permissionPresentation(state);
+        const permissionStatus = document.querySelector<HTMLParagraphElement>("#accessibility-status");
+        if (permissionStatus) permissionStatus.textContent = permission.label;
+        if (intervention) intervention.disabled = rules.length === 0 || !permission.canIntervene;
+      })
+      .catch(() => {
+        const permissionStatus = document.querySelector<HTMLParagraphElement>("#accessibility-status");
+        if (permissionStatus) {
+          permissionStatus.textContent = "손쉬운 사용 권한 상태를 확인하지 못했습니다.";
+        }
+      });
+  });
+
   const resourceStatus = document.querySelector<HTMLParagraphElement>("#resource-status");
   const updateResourceStatus = (): void => {
     void invoke<SystemMetricsState>("get_system_metrics").then((metrics) => {
@@ -284,7 +306,7 @@ function renderSettings(
         sessionsBeforeLongBreak: numberValue(values, "sessionsBeforeLongBreak"),
       },
       focusGuard: {
-        interventionEnabled: values.has("interventionEnabled") && rules.length > 0,
+        interventionEnabled: permission.canIntervene && values.has("interventionEnabled") && rules.length > 0,
         rules,
       },
     };
@@ -350,6 +372,7 @@ async function start(): Promise<void> {
       bootstrap.settings,
       bootstrap.emergencyShortcutAvailable,
       bootstrap.trayAvailable,
+      bootstrap.accessibilityPermission,
     );
   } catch (error) {
     const detail = error instanceof Error ? error.message : String(error);

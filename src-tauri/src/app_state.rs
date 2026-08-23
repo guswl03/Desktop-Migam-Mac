@@ -7,8 +7,9 @@ use crate::{
         todo_service::TodoService,
     },
     domain::settings::Settings,
-    infrastructure::windows::{
-        PlatformForegroundWindowSource, PlatformWindowMinimizer, SystemMetricsMonitor,
+    infrastructure::macos::{
+        AccessibilityPermissionService, PlatformForegroundWindowSource, PlatformWindowMinimizer,
+        SystemMetricsMonitor,
     },
 };
 
@@ -20,6 +21,7 @@ pub struct AppState {
     pub todo_service: TodoService,
     pub foreground_monitor: ForegroundMonitor,
     pub system_metrics_monitor: SystemMetricsMonitor,
+    pub accessibility_permission: AccessibilityPermissionService,
     pub emergency_stopped: AtomicBool,
     pub emergency_shortcut_available: AtomicBool,
     pub tray_available: AtomicBool,
@@ -45,6 +47,7 @@ impl AppState {
                 std::process::id(),
             ),
             system_metrics_monitor: SystemMetricsMonitor::new(),
+            accessibility_permission: AccessibilityPermissionService,
             emergency_stopped: AtomicBool::new(false),
             emergency_shortcut_available: AtomicBool::new(false),
             tray_available: AtomicBool::new(false),

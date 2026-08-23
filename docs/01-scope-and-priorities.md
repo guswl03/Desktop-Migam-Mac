@@ -1,5 +1,13 @@
 # 01. 범위와 우선순위
 
+## 2026-08-24 macOS 전용 전환
+
+현재 제품 타깃은 Apple Silicon M2 이상, macOS 14 Sonoma 이상이다. Windows 호환성, Intel Mac, macOS 13 이하와 Linux는 지원 범위에서 제외한다.
+
+macOS P0에는 Accessibility 권한 확인·요청, 활성 앱과 창 감지, 보호 대상 판정, 경고 후 동일 창 재검증, 안전한 창 최소화가 포함된다. 권한이 없거나 대상 확인이 불확실하면 창 개입만 비활성화하고 나머지 앱은 계속 동작한다.
+
+아래 Windows 11 중심 내용은 최초 MVP의 역사적 범위로 보존하며, 충돌할 때는 이 절과 macOS 이식 설계를 우선한다.
+
 ## P0 — 반드시 완성
 
 - Node.js, Rust, WebView2와 Windows C++ build tools 확인

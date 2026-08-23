@@ -4,6 +4,21 @@
 
 이 문서는 다음 작업 세션이 가장 먼저 확인하는 단일 인수인계 기록이다. 작업을 끝낼 때마다 오래된 내용을 남기지 말고 현재 상태로 갱신한다.
 
+## macOS 전용 이식 상태
+
+2026-08-24에 제품 타깃을 Apple Silicon M2 이상·macOS 14 이상으로 전환했다.
+
+- Windows 인프라 연결을 macOS 모듈로 교체했다.
+- Accessibility 권한 조회·요청, AX 포커스 창 조회, 동일 창 재검증과 `AXMinimized` 설정을 구현했다.
+- Finder, Dock, System Settings와 로그인·보안 관련 창은 보호한다.
+- 권한이 없으면 집중 개입 저장을 off로 정규화하며 다른 기능은 유지한다.
+- 시스템 사용률은 `sysinfo` 기반이며 긴급 단축키는 `Command+Shift+F12`이다.
+- Tauri macOS 14 설정, `.icns`, ad-hoc 빌드 명령과 게시 없는 macOS CI를 추가했다.
+- Windows 호스트에서 TypeScript 검사와 Rust 45개 테스트가 통과했다.
+- macOS CI와 실제 M2/M3 Mac 수동 검증은 아직 완료되지 않았다.
+
+다음 작업은 GitHub macOS CI 결과의 컴파일 오류를 수정한 뒤 `docs/19-macos-development.md`의 실제 Mac 검증표를 수행하는 것이다.
+
 ## 현재 목표
 
 작업 10 `투두리스트·뽀모도로 연동`의 핵심 MVP는 구현됐다. Windows 수동 검증 후 `docs/18-todo-pomodoro-spec.md`의 고급 축하 연출·설정·긴급 취소를 보강한다.

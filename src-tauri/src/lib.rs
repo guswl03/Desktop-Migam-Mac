@@ -11,12 +11,12 @@ use application::{
 };
 use domain::pomodoro::PomodoroPhase;
 use tauri::{Emitter, Manager};
-#[cfg(windows)]
+#[cfg(target_os = "macos")]
 use tauri_plugin_global_shortcut::{Code, GlobalShortcutExt, Modifiers, Shortcut, ShortcutState};
 
-#[cfg(windows)]
+#[cfg(target_os = "macos")]
 fn emergency_shortcut() -> Shortcut {
-    Shortcut::new(Some(Modifiers::CONTROL | Modifiers::SHIFT), Code::F12)
+    Shortcut::new(Some(Modifiers::SUPER | Modifiers::SHIFT), Code::F12)
 }
 
 pub fn run() {
@@ -106,7 +106,7 @@ pub fn run() {
             app.state::<AppState>()
                 .tray_available
                 .store(tray_available, std::sync::atomic::Ordering::SeqCst);
-            #[cfg(windows)]
+            #[cfg(target_os = "macos")]
             {
                 let plugin_available = app
                     .handle()
@@ -115,7 +115,7 @@ pub fn run() {
                             .with_handler(|app, shortcut, event| {
                                 if event.state() == ShortcutState::Pressed
                                     && shortcut
-                                        .matches(Modifiers::CONTROL | Modifiers::SHIFT, Code::F12)
+                                        .matches(Modifiers::SUPER | Modifiers::SHIFT, Code::F12)
                                 {
                                     let state = app.state::<AppState>();
                                     let _ =
@@ -139,6 +139,8 @@ pub fn run() {
             presentation::commands::get_timer_state,
             presentation::commands::get_detection_state,
             presentation::commands::get_system_metrics,
+            presentation::commands::get_accessibility_permission,
+            presentation::commands::request_accessibility_permission,
             presentation::commands::get_gamcha_state,
             presentation::commands::get_todo_state,
             presentation::commands::add_todo,

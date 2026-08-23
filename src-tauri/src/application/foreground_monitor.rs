@@ -281,8 +281,23 @@ impl ForegroundMonitor {
     }
 
     fn is_protected(&self, snapshot: &WindowSnapshot) -> bool {
+        const PROTECTED_BUNDLE_IDS: &[&str] = &[
+            "com.apple.finder",
+            "com.apple.dock",
+            "com.apple.systemsettings",
+            "com.apple.controlcenter",
+            "com.apple.notificationcenterui",
+            "com.apple.loginwindow",
+        ];
         const PROTECTED: &[&str] = &[
             "desktop-pet-mvp.exe",
+            "migam desktop",
+            "Finder",
+            "Dock",
+            "System Settings",
+            "ControlCenter",
+            "NotificationCenter",
+            "loginwindow",
             "taskmgr.exe",
             "explorer.exe",
             "dwm.exe",
@@ -297,6 +312,24 @@ impl ForegroundMonitor {
             || !snapshot.is_visible
             || snapshot.is_minimized
             || snapshot.is_fullscreen
+            || snapshot.bundle_id.as_ref().is_some_and(|bundle_id| {
+                PROTECTED_BUNDLE_IDS
+                    .iter()
+                    .any(|protected| protected.eq_ignore_ascii_case(bundle_id))
+            })
+            || snapshot.title.as_ref().is_some_and(|title| {
+                let title = title.to_lowercase();
+                [
+                    "password",
+                    "passcode",
+                    "authentication",
+                    "security",
+                    "암호",
+                    "인증",
+                ]
+                .iter()
+                .any(|protected| title.contains(protected))
+            })
             || snapshot.process_name.as_ref().is_none_or(|name| {
                 PROTECTED
                     .iter()
@@ -360,6 +393,7 @@ mod tests {
             window_id: 42,
             process_id: 100,
             process_name: Some(process.to_owned()),
+            bundle_id: Some("com.google.Chrome".to_owned()),
             title: Some(title.to_owned()),
             is_visible: true,
             is_minimized: false,
@@ -370,6 +404,41 @@ mod tests {
             width: 800,
             height: 600,
         }
+    }
+
+    #[test]
+    fn protected_macos_bundle_never_starts_an_intervention() {
+        let calls = Arc::new(AtomicUsize::new(0));
+        let minimized = Arc::new(AtomicUsize::new(0));
+        let mut protected = snapshot("Finder", "Finder");
+        protected.bundle_id = Some("com.apple.finder".to_owned());
+        let monitor = ForegroundMonitor::new(
+            Box::new(FakeSource {
+                calls,
+                snapshot: Some(protected),
+            }),
+            Box::new(FakeMinimizer(minimized.clone())),
+            999,
+        );
+        let mut settings = settings();
+        settings.rules[0].process_name = Some("Finder".to_owned());
+        settings.rules[0].window_title = None;
+        let now = Instant::now();
+
+        assert!(monitor
+            .poll(now, true, false, &settings)
+            .unwrap()
+            .is_empty());
+        assert!(monitor
+            .poll(
+                now + std::time::Duration::from_secs(5),
+                true,
+                false,
+                &settings,
+            )
+            .unwrap()
+            .is_empty());
+        assert_eq!(minimized.load(Ordering::SeqCst), 0);
     }
 
     fn monitor(calls: Arc<AtomicUsize>, minimized: Arc<AtomicUsize>) -> ForegroundMonitor {

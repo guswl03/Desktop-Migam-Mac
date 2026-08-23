@@ -5,7 +5,7 @@ use tauri::{
     App, AppHandle, Manager,
 };
 
-use crate::infrastructure::windows::SystemMetricsSnapshot;
+use crate::infrastructure::macos::SystemMetricsSnapshot;
 
 const CPU_TRAY_ID: &str = "resource-cpu";
 const MEMORY_TRAY_ID: &str = "resource-memory";
