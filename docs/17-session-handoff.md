@@ -20,6 +20,8 @@
 - 전역 긴급 중지 단축키 `Ctrl+Shift+F12`가 연결되어 있으며 등록 실패 시 설정 화면에 경고한다.
 - 트레이 또는 단축키 초기화 실패가 앱 전체를 종료시키지 않도록 격리되어 있다.
 - Vite가 `src-tauri/target`과 `.tools`를 감시하지 않아 잠긴 Rust 실행 파일로 인한 EBUSY 종료를 피한다.
+- Gamjabot 디자인 보드와 10개 상태·35개 투명 PNG 프레임, manifest, 재생성 스크립트가 추가되었다.
+- 펫 창의 기본 placeholder 이미지는 Gamjabot idle 프레임을 사용한다.
 
 ## 이번 세션 변경 파일
 
@@ -37,6 +39,10 @@
 - `src-tauri/src/presentation/tray.rs`
 - `src-tauri/src/domain/settings.rs`
 - `src-tauri/src/domain/distraction.rs`
+- `images/characters/gamjabot/design/`
+- `images/characters/gamjabot/source/`
+- `images/characters/gamjabot/pack/`
+- `scripts/generate-gamjabot-pack.py`
 - 관련 개발·진행 문서
 
 ## 검증 상태
@@ -47,6 +53,7 @@
 - `. .\scripts\use-project-rust.ps1`을 실행하면 현재 PowerShell에서 Rust/Cargo를 사용할 수 있다.
 - npm 의존성 설치 완료.
 - `npm run typecheck`, `npm run build`, `npm test` 통과. 프런트 테스트 파일은 아직 없다.
+- Gamjabot 생성 검증 통과: 256×256 RGBA, 가시 팔레트 순수 검정·흰색, 10개 상태.
 - Rust 테스트 16개, rustfmt, Clippy와 Tauri release 앱 빌드가 통과했다.
 - Codex 샌드박스에서는 Windows GUI 창 생성이 access denied로 차단되어 실제 실행 수동 확인이 필요하다.
 

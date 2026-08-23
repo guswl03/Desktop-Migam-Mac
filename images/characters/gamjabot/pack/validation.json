@@ -1,0 +1,21 @@
+{
+  "ok": true,
+  "canvas": [
+    256,
+    256
+  ],
+  "visibleColours": [
+    [
+      0,
+      0,
+      0
+    ],
+    [
+      255,
+      255,
+      255
+    ]
+  ],
+  "eyeNoiseGuard": "visible pixels restricted to pure black and pure white",
+  "failures": []
+}

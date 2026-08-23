@@ -41,6 +41,7 @@
 - [x] Rust 16개 테스트, rustfmt, Clippy 통과
 - [x] 전역 `Ctrl+Shift+F12` 등록과 실패 격리 구현
 - [x] Tauri release 앱 빌드 성공
+- [x] Gamjabot 10개 상태·35개 256×256 투명 프레임과 manifest 추가
 
 ## 다음 작업
 
@@ -83,6 +84,7 @@
 | 2026-08-23 | `npm run tauri -- build --no-bundle` | 통과 | release 실행 파일 생성 |
 | 2026-08-23 | release 실행 smoke test | 차단 | 샌드박스가 Tauri GUI 창 생성 시 access denied 반환 |
 | 2026-08-23 | Vite watcher 설정 | 수정 | Rust 빌드 결과와 프로젝트 도구 폴더 감시 제외 |
+| 2026-08-23 | Gamjabot 팩 생성·검증 | 통과 | 순수 흑백 팔레트, 10개 상태, 프런트 테스트·빌드 통과 |
 
 ## 시간 예산
 

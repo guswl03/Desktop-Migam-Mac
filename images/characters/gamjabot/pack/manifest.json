@@ -1,0 +1,140 @@
+{
+  "schemaVersion": 1,
+  "id": "gamjabot",
+  "displayName": "Gamjabot",
+  "canvas": {
+    "width": 256,
+    "height": 256
+  },
+  "anchors": {
+    "feet": {
+      "x": 128,
+      "y": 238
+    },
+    "speech": {
+      "x": 128,
+      "y": 18
+    },
+    "accessory": {
+      "x": 128,
+      "y": 92
+    },
+    "kickImpact": {
+      "x": 232,
+      "y": 196
+    }
+  },
+  "hitbox": {
+    "x": 34,
+    "y": 22,
+    "width": 188,
+    "height": 218
+  },
+  "animations": {
+    "idle": {
+      "frames": [
+        "idle/0.png",
+        "idle/1.png",
+        "idle/2.png",
+        "idle/3.png"
+      ],
+      "frameMs": 420,
+      "loop": true
+    },
+    "walk": {
+      "frames": [
+        "walk/0.png",
+        "walk/1.png",
+        "walk/2.png",
+        "walk/3.png"
+      ],
+      "frameMs": 130,
+      "loop": true
+    },
+    "dragged": {
+      "frames": [
+        "dragged/0.png",
+        "dragged/1.png"
+      ],
+      "frameMs": 160,
+      "loop": true
+    },
+    "thrown": {
+      "frames": [
+        "thrown/0.png",
+        "thrown/1.png",
+        "thrown/2.png",
+        "thrown/3.png"
+      ],
+      "frameMs": 90,
+      "loop": true
+    },
+    "kick": {
+      "frames": [
+        "kick/0.png",
+        "kick/1.png",
+        "kick/2.png",
+        "kick/3.png"
+      ],
+      "frameMs": 90,
+      "loop": false,
+      "impactFrame": 2
+    },
+    "speak": {
+      "frames": [
+        "speak/0.png",
+        "speak/1.png",
+        "speak/2.png",
+        "speak/3.png"
+      ],
+      "frameMs": 180,
+      "loop": true
+    },
+    "chase": {
+      "frames": [
+        "chase/0.png",
+        "chase/1.png",
+        "chase/2.png",
+        "chase/3.png"
+      ],
+      "frameMs": 115,
+      "loop": true
+    },
+    "dance": {
+      "frames": [
+        "dance/0.png",
+        "dance/1.png",
+        "dance/2.png",
+        "dance/3.png"
+      ],
+      "frameMs": 140,
+      "loop": true
+    },
+    "carry-card": {
+      "frames": [
+        "carry-card/0.png",
+        "carry-card/1.png"
+      ],
+      "frameMs": 260,
+      "loop": true
+    },
+    "click-react": {
+      "frames": [
+        "click-react/0.png",
+        "click-react/1.png",
+        "click-react/2.png"
+      ],
+      "frameMs": 110,
+      "loop": false
+    }
+  },
+  "accessories": [],
+  "artRules": {
+    "palette": [
+      "#000000",
+      "#FFFFFF"
+    ],
+    "eyeNoise": "No marks other than one solid pupil per eye",
+    "accessoryStrategy": "Separate transparent 256x256 overlay layers"
+  }
+}

@@ -1,6 +1,6 @@
 import { invoke } from "@tauri-apps/api/core";
 import { getCurrentWindow } from "@tauri-apps/api/window";
-import placeholderSprite from "../images/app/character/idle.svg";
+import gamjabotSprite from "../images/characters/gamjabot/pack/idle/0.png";
 import type { BootstrapState, Settings } from "./contracts";
 import "./styles.css";
 
@@ -15,8 +15,8 @@ document.body.dataset.window = windowLabel;
 
 function renderPet(): void {
   app!.innerHTML = `
-    <main class="pet-shell" aria-label="Desktop pet placeholder">
-      <img class="pet-placeholder" src="${placeholderSprite}" alt="Temporary geometric desktop pet" draggable="false" />
+    <main class="pet-shell" aria-label="Gamjabot desktop pet">
+      <img class="pet-placeholder" src="${gamjabotSprite}" alt="Gamjabot desktop pet" draggable="false" />
     </main>
   `;
 }
