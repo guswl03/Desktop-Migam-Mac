@@ -3,7 +3,7 @@
 ## 전체 구조
 
 ```text
-React 창
+TypeScript 창
   pet / timer / settings / card
         ↕ command · event
 Tauri presentation
@@ -26,7 +26,7 @@ presentation → application → domain
 - `application`: 사용 사례 순서, 취소와 서비스 조정
 - `infrastructure`: 파일, 시계, 난수와 Windows API
 - `presentation`: Tauri command/event, tray, window와 hotkey
-- React: 표시와 포인터 입력 수집
+- TypeScript UI: DOM 표시와 포인터 입력 수집
 
 ## 주요 서비스
 

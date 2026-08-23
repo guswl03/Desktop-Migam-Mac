@@ -3,7 +3,7 @@
 ## P0 — 반드시 완성
 
 - Node.js, Rust, WebView2와 Windows C++ build tools 확인
-- Tauri 2 + React + TypeScript 프로젝트 신규 생성
+- Tauri 2 + Vite + 순수 TypeScript 프로젝트 신규 생성
 - Tauri 트레이와 투명 펫 창
 - Idle, Walk, 방향 전환
 - 단일/다중 모니터 작업 영역 경계

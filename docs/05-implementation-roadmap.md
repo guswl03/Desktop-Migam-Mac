@@ -5,7 +5,7 @@
 다음 항목이 하나도 없다고 가정한다.
 
 - 소스 코드와 Git 저장소
-- Tauri/React 프로젝트
+- Tauri/Vite/TypeScript 프로젝트
 - 창, 트레이와 설정 코드
 - 캐릭터 이미지, 애니메이션, 아이콘과 효과음
 - 테스트와 CI
@@ -47,7 +47,7 @@
 | 시간 | 단계 | 핵심 작업 | 통과 조건 |
 |---:|---|---|---|
 | 0:00~1:00 | 환경 준비 | 필수 도구 확인, 작업 폴더와 Git 생성, 범위 고정 | 버전과 설치 누락 목록 기록 |
-| 1:00~2:00 | 프로젝트 생성 | Tauri 2 + React + TS scaffold, 첫 dev 실행 | 빈 앱이 Windows에서 실행 |
+| 1:00~2:00 | 프로젝트 생성 | Tauri 2 + Vite + 순수 TS scaffold, 첫 dev 실행 | 빈 앱이 Windows에서 실행 |
 | 2:00~3:30 | 앱 셸 | window label, tray, pet/settings/timer 창, 기본 CSS placeholder | tray에서 각 창 표시/숨김 |
 | 3:30~4:30 | 기반 구조 | Rust 계층, AppState, error, command/event 골격, 첫 release build | release build 또는 명확한 환경 이슈 |
 | 4:30~6:00 | 설정 | 기본값, validation, JSON load/save, settings 최소 UI | 재실행 후 설정 복원 |
@@ -88,7 +88,7 @@
 
 ### 단계 1 — 프로젝트 생성: 1:00~2:00
 
-1. Tauri 2 + React + TypeScript 템플릿으로 프로젝트를 만든다.
+1. Tauri 2 + Vite + 순수 TypeScript 템플릿으로 프로젝트를 만든다.
 2. package install과 Rust dependency fetch를 완료한다.
 3. 기본 앱을 dev 모드로 실행한다.
 4. 기본 테스트/포맷 명령을 package scripts에 등록한다.

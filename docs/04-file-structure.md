@@ -15,34 +15,33 @@ desktop-pet/
 │  └─ privacy.md
 ├─ public/icons/tray.ico
 ├─ src/
-│  ├─ main.tsx
-│  ├─ AppRouter.tsx
+│  ├─ main.ts
+│  ├─ contracts.ts
 │  ├─ shared/
 │  │  ├─ api/commands.ts
 │  │  ├─ api/events.ts
 │  │  ├─ api/contracts.ts
-│  │  ├─ hooks/useAppEvent.ts
 │  │  └─ styles/tokens.css
 │  ├─ pet/
-│  │  ├─ PetApp.tsx
-│  │  ├─ PetSprite.tsx
-│  │  ├─ SpeechBubble.tsx
-│  │  ├─ usePetInteraction.ts
+│  │  ├─ pet-app.ts
+│  │  ├─ pet-sprite.ts
+│  │  ├─ speech-bubble.ts
+│  │  ├─ pet-interaction.ts
 │  │  ├─ spriteResolver.ts
-│  │  └─ pet.module.css
+│  │  └─ pet.css
 │  ├─ timer/
-│  │  ├─ TimerApp.tsx
-│  │  ├─ TimerControls.tsx
-│  │  └─ timer.module.css
+│  │  ├─ timer-app.ts
+│  │  ├─ timer-controls.ts
+│  │  └─ timer.css
 │  ├─ settings/
-│  │  ├─ SettingsApp.tsx
-│  │  ├─ PetSettingsSection.tsx
-│  │  ├─ PomodoroSettingsSection.tsx
-│  │  ├─ FocusGuardSection.tsx
-│  │  ├─ DistractionRuleEditor.tsx
-│  │  ├─ SafetySection.tsx
+│  │  ├─ settings-app.ts
+│  │  ├─ pet-settings-section.ts
+│  │  ├─ pomodoro-settings-section.ts
+│  │  ├─ focus-guard-section.ts
+│  │  ├─ distraction-rule-editor.ts
+│  │  ├─ safety-section.ts
 │  │  └─ settingsReducer.ts
-│  └─ card/CardApp.tsx
+│  └─ card/card-app.ts
 └─ src-tauri/
    ├─ Cargo.toml
    ├─ tauri.conf.json
@@ -117,9 +116,9 @@ desktop-pet/
 5. `src-tauri/src/presentation/windows.rs`
 6. `src-tauri/src/presentation/tray.rs`
 7. `src-tauri/src/presentation/hotkey.rs`
-8. `src/AppRouter.tsx`
-9. `src/pet/PetApp.tsx`
-10. `src/settings/SettingsApp.tsx`
+8. `src/main.ts`
+9. `src/pet/pet-app.ts`
+10. `src/settings/settings-app.ts`
 
 나머지는 해당 기능을 구현할 때 생성한다. 빈 골격 파일을 한꺼번에 만들지 않는다.
 

@@ -5,8 +5,9 @@
   "type": "module",
   "scripts": {
     "dev": "vite",
-    "build": "tsc --noEmit && vite build",
-    "test": "vitest run",
+    "build": "tsc --noEmit && vite build --configLoader runner",
+    "lint": "tsc --noEmit",
+    "test": "vitest run --configLoader runner",
     "typecheck": "tsc --noEmit",
     "tauri": "tauri"
   },
