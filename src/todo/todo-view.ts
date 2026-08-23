@@ -16,12 +16,8 @@ interface TodoSnapshot {
 export async function mountTodo(container: HTMLElement): Promise<() => void> {
   container.innerHTML = `
     <main class="todo-app">
-      <header class="todo-debug-chrome">
-        <nav class="todo-debug-menu" aria-label="투두 메뉴"><span class="active">File</span><span>Home</span><span>Focus</span><span>View</span></nav>
-        <div class="todo-debug-ribbon" aria-hidden="true"><span><b>＋</b> New Task</span><span><b>✓</b> Complete</span><span><b>▶</b> Start Focus</span><span><b>◷</b> Timer</span></div>
-      </header>
       <section class="todo-debug-document">
-        <div class="todo-pane-title"><span>DesktopPet.Todo</span><span>×</span></div>
+        <div class="todo-pane-title"><span>DesktopPet.Todo</span></div>
         <div class="todo-command-line"><span>0:000&gt;</span><span>.todo /today /local</span><span class="todo-caret">_</span></div>
         <div class="todo-app-header"><div><span class="todo-kicker">GAMJABOT TASK MANAGER</span><h1>오늘 할 일</h1></div><strong id="todo-summary">0 / 0</strong></div>
         <fieldset class="todo-focus-card" aria-label="현재 집중 항목"><legend>Focus Target</legend><span>지금 집중할 일</span><strong id="todo-current">선택된 할 일 없음</strong><button id="todo-start-focus" type="button">집중 시작</button></fieldset>
