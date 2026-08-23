@@ -1,6 +1,9 @@
 use std::time::{Duration, Instant};
 
-#[derive(Clone, Copy, Debug, Eq, PartialEq)]
+use serde::Serialize;
+
+#[derive(Clone, Copy, Debug, Eq, PartialEq, Serialize)]
+#[serde(rename_all = "camelCase")]
 pub enum PomodoroPhase {
     Stopped,
     Focus,
@@ -83,6 +86,23 @@ impl PomodoroMachine {
                 .deadline
                 .map(|deadline| deadline.saturating_duration_since(now)),
         }
+    }
+
+    pub fn reconfigure(
+        &mut self,
+        focus_duration: Duration,
+        short_break_duration: Duration,
+        long_break_duration: Duration,
+        sessions_before_long_break: u32,
+    ) -> bool {
+        if self.phase != PomodoroPhase::Stopped {
+            return false;
+        }
+        self.focus_duration = focus_duration;
+        self.short_break_duration = short_break_duration;
+        self.long_break_duration = long_break_duration;
+        self.sessions_before_long_break = sessions_before_long_break;
+        true
     }
 
     pub fn reduce(&mut self, event: PomodoroEvent, now: Instant) -> Vec<PomodoroEffect> {
@@ -347,5 +367,25 @@ mod tests {
             ]
         );
         assert!(machine.reduce(PomodoroEvent::Tick, woke_at).is_empty());
+    }
+
+    #[test]
+    fn settings_can_only_reconfigure_a_stopped_timer() {
+        let now = Instant::now();
+        let mut machine = machine();
+        assert!(machine.reconfigure(
+            Duration::from_secs(10 * 60),
+            Duration::from_secs(2 * 60),
+            Duration::from_secs(20 * 60),
+            3,
+        ));
+        machine.reduce(PomodoroEvent::Start, now);
+        assert_eq!(machine.deadline(), Some(now + Duration::from_secs(10 * 60)));
+        assert!(!machine.reconfigure(
+            Duration::from_secs(99 * 60),
+            Duration::from_secs(2 * 60),
+            Duration::from_secs(20 * 60),
+            3,
+        ));
     }
 }

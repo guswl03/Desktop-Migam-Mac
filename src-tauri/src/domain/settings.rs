@@ -18,6 +18,18 @@ pub struct Settings {
 #[serde(rename_all = "camelCase")]
 pub struct PetSettings {
     pub visual_scale_percent: u8,
+    #[serde(default)]
+    pub resource_response_mode: ResourceResponseMode,
+}
+
+#[derive(Clone, Copy, Debug, Default, Deserialize, Eq, PartialEq, Serialize)]
+#[serde(rename_all = "camelCase")]
+pub enum ResourceResponseMode {
+    #[default]
+    Off,
+    Cpu,
+    Memory,
+    Combined,
 }
 
 #[derive(Clone, Debug, Deserialize, Eq, PartialEq, Serialize)]
@@ -47,6 +59,8 @@ pub enum ValidationError {
     LongBreakMinutesOutOfRange(u16),
     #[error("sessions before a long break must be positive")]
     SessionsBeforeLongBreakMustBePositive,
+    #[error("distraction rule {0} is invalid: {1}")]
+    InvalidDistractionRule(usize, String),
 }
 
 #[derive(Debug, Error)]
@@ -87,6 +101,7 @@ impl Default for Settings {
             schema_version: CURRENT_SCHEMA_VERSION,
             pet: PetSettings {
                 visual_scale_percent: 100,
+                resource_response_mode: ResourceResponseMode::Off,
             },
             pomodoro: PomodoroSettings {
                 focus_minutes: 25,
@@ -122,8 +137,13 @@ impl Settings {
         if self.pomodoro.sessions_before_long_break == 0 {
             return Err(ValidationError::SessionsBeforeLongBreakMustBePositive);
         }
+        for (index, rule) in self.focus_guard.rules.iter().enumerate() {
+            rule.validate().map_err(|error| {
+                ValidationError::InvalidDistractionRule(index + 1, error.to_string())
+            })?;
+        }
         self.pet.visual_scale_percent = self.pet.visual_scale_percent.clamp(50, 200);
-        if self.focus_guard.rules.is_empty() {
+        if !self.focus_guard.rules.iter().any(|rule| rule.enabled) {
             self.focus_guard.intervention_enabled = false;
         }
         Ok(self)
@@ -167,6 +187,10 @@ mod tests {
         assert_eq!(settings.pomodoro.short_break_minutes, 5);
         assert_eq!(settings.pomodoro.long_break_minutes, 15);
         assert_eq!(settings.pomodoro.sessions_before_long_break, 4);
+        assert_eq!(
+            settings.pet.resource_response_mode,
+            ResourceResponseMode::Off
+        );
     }
 
     #[test]
@@ -218,5 +242,28 @@ mod tests {
         assert_eq!(migrated.schema_version, CURRENT_SCHEMA_VERSION);
         assert_eq!(migrated.pomodoro.sessions_before_long_break, 4);
         assert!(!migrated.focus_guard.intervention_enabled);
+    }
+
+    #[test]
+    fn current_settings_without_resource_mode_default_to_off() {
+        let settings = Settings::from_json(
+            r#"{
+                "schemaVersion": 2,
+                "pet": { "visualScalePercent": 100 },
+                "pomodoro": {
+                    "focusMinutes": 25,
+                    "shortBreakMinutes": 5,
+                    "longBreakMinutes": 15,
+                    "sessionsBeforeLongBreak": 4
+                },
+                "focusGuard": { "interventionEnabled": false, "rules": [] }
+            }"#,
+        )
+        .unwrap();
+
+        assert_eq!(
+            settings.pet.resource_response_mode,
+            ResourceResponseMode::Off
+        );
     }
 }
