@@ -6,10 +6,18 @@
     "width": 256,
     "height": 256
   },
+  "sourceAtlas": {
+    "path": "images/characters/gamjabot/references/base-spritesheet-extended.png",
+    "sha256": "a543be420dcd0ef43286296cb53c329db679a8ce257fcac0c7388d09e514cc18",
+    "spriteVersionNumber": 2,
+    "cellWidth": 192,
+    "cellHeight": 208,
+    "extraction": "pixel-exact 1:1; no redraw, resize, rotation, cleanup, or palette conversion"
+  },
   "anchors": {
     "feet": {
       "x": 128,
-      "y": 238
+      "y": 232
     },
     "speech": {
       "x": 128,
@@ -25,10 +33,10 @@
     }
   },
   "hitbox": {
-    "x": 34,
-    "y": 22,
-    "width": 188,
-    "height": 218
+    "x": 32,
+    "y": 24,
+    "width": 192,
+    "height": 208
   },
   "animations": {
     "idle": {
@@ -36,48 +44,66 @@
         "idle/0.png",
         "idle/1.png",
         "idle/2.png",
-        "idle/3.png"
+        "idle/3.png",
+        "idle/4.png",
+        "idle/5.png",
+        "idle/6.png"
       ],
       "frameMs": 420,
-      "loop": true
+      "loop": true,
+      "sourceRow": 0
     },
     "walk": {
       "frames": [
         "walk/0.png",
         "walk/1.png",
         "walk/2.png",
-        "walk/3.png"
+        "walk/3.png",
+        "walk/4.png",
+        "walk/5.png",
+        "walk/6.png",
+        "walk/7.png"
       ],
-      "frameMs": 130,
-      "loop": true
+      "frameMs": 110,
+      "loop": true,
+      "sourceRow": 1
     },
     "dragged": {
       "frames": [
         "dragged/0.png",
-        "dragged/1.png"
+        "dragged/1.png",
+        "dragged/2.png",
+        "dragged/3.png",
+        "dragged/4.png",
+        "dragged/5.png"
       ],
       "frameMs": 160,
-      "loop": true
+      "loop": true,
+      "sourceRow": 6
     },
     "thrown": {
       "frames": [
         "thrown/0.png",
         "thrown/1.png",
         "thrown/2.png",
-        "thrown/3.png"
+        "thrown/3.png",
+        "thrown/4.png"
       ],
-      "frameMs": 90,
-      "loop": true
+      "frameMs": 100,
+      "loop": true,
+      "sourceRow": 4
     },
     "kick": {
       "frames": [
         "kick/0.png",
         "kick/1.png",
         "kick/2.png",
-        "kick/3.png"
+        "kick/3.png",
+        "kick/4.png"
       ],
-      "frameMs": 90,
+      "frameMs": 100,
       "loop": false,
+      "sourceRow": 4,
       "impactFrame": 2
     },
     "speak": {
@@ -88,53 +114,70 @@
         "speak/3.png"
       ],
       "frameMs": 180,
-      "loop": true
+      "loop": true,
+      "sourceRow": 3
     },
     "chase": {
       "frames": [
         "chase/0.png",
         "chase/1.png",
         "chase/2.png",
-        "chase/3.png"
+        "chase/3.png",
+        "chase/4.png",
+        "chase/5.png",
+        "chase/6.png",
+        "chase/7.png"
       ],
-      "frameMs": 115,
-      "loop": true
+      "frameMs": 110,
+      "loop": true,
+      "sourceRow": 2
     },
     "dance": {
       "frames": [
         "dance/0.png",
         "dance/1.png",
         "dance/2.png",
-        "dance/3.png"
+        "dance/3.png",
+        "dance/4.png",
+        "dance/5.png"
       ],
       "frameMs": 140,
-      "loop": true
+      "loop": true,
+      "sourceRow": 7
     },
     "carry-card": {
       "frames": [
         "carry-card/0.png",
-        "carry-card/1.png"
+        "carry-card/1.png",
+        "carry-card/2.png",
+        "carry-card/3.png",
+        "carry-card/4.png",
+        "carry-card/5.png"
       ],
-      "frameMs": 260,
-      "loop": true
+      "frameMs": 220,
+      "loop": true,
+      "sourceRow": 8
     },
     "click-react": {
       "frames": [
         "click-react/0.png",
         "click-react/1.png",
-        "click-react/2.png"
+        "click-react/2.png",
+        "click-react/3.png",
+        "click-react/4.png",
+        "click-react/5.png",
+        "click-react/6.png",
+        "click-react/7.png"
       ],
-      "frameMs": 110,
-      "loop": false
+      "frameMs": 120,
+      "loop": false,
+      "sourceRow": 5
     }
   },
   "accessories": [],
   "artRules": {
-    "palette": [
-      "#000000",
-      "#FFFFFF"
-    ],
-    "eyeNoise": "No marks other than one solid pupil per eye",
+    "canonicalBase": "user-provided spritesheet-extended.png",
+    "pixelFidelity": "Preserve every source RGBA pixel exactly",
     "accessoryStrategy": "Separate transparent 256x256 overlay layers"
   }
 }

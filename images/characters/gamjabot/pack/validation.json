@@ -1,21 +1,24 @@
 {
   "ok": true,
-  "canvas": [
+  "sourceAtlas": "images/characters/gamjabot/references/base-spritesheet-extended.png",
+  "sourceSha256": "a543be420dcd0ef43286296cb53c329db679a8ce257fcac0c7388d09e514cc18",
+  "sourceCanvas": [
+    1536,
+    2288
+  ],
+  "sourceCell": [
+    192,
+    208
+  ],
+  "outputCanvas": [
     256,
     256
   ],
-  "visibleColours": [
-    [
-      0,
-      0,
-      0
-    ],
-    [
-      255,
-      255,
-      255
-    ]
+  "cellOffset": [
+    32,
+    24
   ],
-  "eyeNoiseGuard": "visible pixels restricted to pure black and pure white",
+  "framesChecked": 63,
+  "pixelExact": true,
   "failures": []
 }
