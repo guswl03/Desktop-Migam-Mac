@@ -48,9 +48,12 @@ export async function mountTimer(container: HTMLElement): Promise<() => void> {
   try { render(await invokeWhenReady<TimerState>("get_timer_state")); }
   catch { error.textContent = "재연결 중"; }
   const unlisten = await listen<TimerState>("timer://state", ({ payload }) => { error.textContent = ""; render(payload); }).catch(() => () => undefined);
+  const unlistenDrag = await listen<{ dragging: boolean }>("pet://drag-state", ({ payload }) => {
+    container.classList.toggle("pet-dragging", payload.dragging);
+  }).catch(() => () => undefined);
   const poll = window.setInterval(() => {
     void invoke<TimerState>("get_timer_state").then(render).catch(() => undefined);
     void invoke("position_timer_bubble").catch(() => undefined);
   }, 500);
-  return () => { disposed = true; window.clearInterval(poll); unlisten(); };
+  return () => { disposed = true; window.clearInterval(poll); unlisten(); unlistenDrag(); };
 }

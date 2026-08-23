@@ -25,6 +25,7 @@ export interface Settings {
   pet: {
     visualScalePercent: number;
     resourceResponseMode: ResourceResponseMode;
+    automaticPhotoDeliveryEnabled: boolean;
   };
   pomodoro: {
     focusMinutes: number;

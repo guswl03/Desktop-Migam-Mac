@@ -1,40 +1,24 @@
 # migam desktop
 
-Windows 11 전용 Tauri 2 + Rust + 순수 TypeScript 투명 오버레이 데스크톱 펫 프로젝트입니다. 감자봇이 바탕화면을 돌아다니고, 사용자가 드래그하거나 던질 수 있으며, 뽀모도로 집중 세션과 방해 창 개입 기능을 제공하는 것을 목표로 합니다.
+Windows 11용 데스크톱 펫과 집중 도우미입니다. 감자봇이 작업표시줄을 피해 화면을 돌아다니며 드래그·던지기·상태별 애니메이션, 뽀모도로, 할 일 관리와 안전한 방해 창 개입을 제공합니다.
 
-현재 앱 코드는 MVP 골격을 구현 중이며, 캐릭터 원화·애니메이션 결과물과 개발 명세를 함께 보관합니다.
+## 주요 기능
 
-## 저장소 구조
+- 투명·항상 위 펫 창, 시스템 트레이와 다중 모니터 작업 영역 이동
+- 클릭, 드래그, 던지기와 착지·충돌 애니메이션
+- CPU·메모리 사용량에 반응하는 이동과 트레이 표시
+- 뽀모도로와 할 일 집중 연결
+- 집중 완료 보상 티켓, GAMCHA와 156종 코스튬 인벤토리
+- 방해 규칙, 대상 재검증 후 안전한 최소화
+- 사진 배달 연출과 `Ctrl+Shift+F12` 긴급 중지
+- 설정·할 일·GAMCHA 로컬 저장 및 손상 JSON 보존·복구
 
-```text
-.
-├─ src/                         # TypeScript 오버레이 UI
-├─ src-tauri/                   # Tauri 2 + Rust 애플리케이션
-├─ images/
-│  ├─ app/                      # 앱 아이콘과 임시 실행용 캐릭터
-│  ├─ characters/
-│  │  ├─ gamjabot/              # 감자봇 원본·프레임·아틀라스·QA 자료
-│  │  └─ nemo/                  # 네모 원본·프레임·아틀라스·QA 자료
-│  └─ references/               # Stitch 캐릭터 디자인 참고 이미지
-└─ docs/                        # 제품 명세, 구현 계획, 안전·테스트 문서
-```
+방해 창 개입은 기본적으로 꺼져 있으며 사용자가 규칙을 만들고 명시적으로 활성화해야 동작합니다. 실제 창 제목이나 프로세스 경로는 저장하거나 로그로 남기지 않습니다.
 
-## MVP 핵심 범위
-
-- 투명 오버레이 펫의 걷기, 드래그, 던지기
-- 말하기, 춤, 클릭 이스터에그 등 랜덤 반응
-- 사용자 설정 가능한 뽀모도로 타이머
-- 집중 중 방해 앱 감지, 발차기 애니메이션 후 대상 창 최소화
-- 긴급 중지 단축키와 보수적인 Windows 창 보호 규칙
-- 교체 가능한 캐릭터 팩과 후속 `네모` 이스터에그 확장 지점
-
-상세 제품·기술 기준은 [개발 문서 색인](docs/README.md)과 [Windows 데스크톱 펫 MVP 설계](docs/superpowers/specs/2026-08-23-windows-desktop-pet-mvp-design.md)를 참고하세요.
-
-## 개발
+## 개발 실행
 
 ```powershell
 npm install
-. .\scripts\use-project-rust.ps1
 npm run tauri -- dev
 ```
 
@@ -43,14 +27,36 @@ npm run tauri -- dev
 ```powershell
 npm run typecheck
 npm test
-Set-Location src-tauri
-cargo check --workspace
+npm run build
+cd src-tauri
+cargo test --workspace
+cargo fmt --check
+cargo clippy --workspace -- -D warnings
 ```
 
-집중 방해 창 최소화는 사용자가 명시적으로 활성화해야 하며, 긴급 중지 단축키는 `Ctrl+Shift+F12`를 기준으로 합니다.
+설치 파일은 `npm run tauri -- build`로 만들며 `src-tauri/target/release/bundle/` 아래에 생성됩니다.
 
-## 현재 상태
+## 사용 방법
 
-- 설정·뽀모도로·방해 규칙 도메인 모델: 구현 중
-- Windows 오버레이와 창 개입: 후속 구현 필요
-- 감자봇·네모 v2 아틀라스: 정적 검증 완료, 최종 시각 QA 필요
+- 펫 우클릭: 타이머, 할 일, GAMCHA, 설정과 테스트 기능
+- 펫 좌클릭 드래그: 위치 이동, 빠르게 놓으면 던지기
+- 트레이 메뉴: 창 표시, 긴급 중지, 다시 시작, 종료
+- 긴급 중지: `Ctrl+Shift+F12`
+
+## 로컬 데이터와 개인정보
+
+설정·할 일·GAMCHA 진행도는 Tauri 앱 데이터 디렉터리의 `settings.json`, `todo.json`, `gamcha.json`에 저장됩니다. 손상된 파일은 `*.corrupt-<timestamp>.json`으로 보존하고 안전한 기본값으로 복구합니다.
+
+- 계정·클라우드 동기화·분석 기능 없음
+- 실제 창 제목과 프로세스 경로 저장·로그 금지
+- 관리자·시스템·전체 화면·판정 불가 창은 최소화하지 않음
+
+## 현재 검증 상태
+
+- 프런트엔드 테스트 25개와 Rust 테스트 43개 통과
+- TypeScript 검사, Vite production build, rustfmt와 Clippy 통과
+- Windows x64 MSI·NSIS release 빌드 성공
+
+실제 DPI, 다중 모니터, 투명 영역 입력, 모든 코스튬 정렬과 장시간 안정성은 Windows 환경별 수동 확인이 필요합니다. 자동 업데이트와 코드 서명은 현재 범위에 포함되지 않습니다.
+
+상세 기준은 [개발 문서 색인](docs/README.md)을 참고하세요.

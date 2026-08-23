@@ -5,6 +5,7 @@ import {
   getPositionBounds,
   getVisiblePositionBounds,
   pickHorizontalTarget,
+  isPetMotionLocked,
 } from "./motion";
 
 describe("pet motion", () => {
@@ -63,4 +64,11 @@ describe("pet motion", () => {
     expect(advanceToward(10, 20, 100, 0.2)).toBe(20);
     expect(advanceToward(20, 0, 50, 0.1)).toBe(15);
   });
-});
+
+  it("locks pet activity only during focus or a paused focus", () => {
+    expect(isPetMotionLocked("focus")).toBe(true);
+    expect(isPetMotionLocked("paused")).toBe(true);
+    expect(isPetMotionLocked("shortBreak")).toBe(false);
+    expect(isPetMotionLocked("longBreak")).toBe(false);
+    expect(isPetMotionLocked("stopped")).toBe(false);
+  });});

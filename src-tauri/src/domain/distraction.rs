@@ -38,9 +38,9 @@ pub enum DistractionRuleError {
     MissingConditions,
     #[error("a distraction rule process must be a file name, not a path")]
     ProcessNameIsPath,
-    #[error("grace seconds must be between 5 and 600")]
+    #[error("grace seconds must be between 1 and 600")]
     GraceOutOfRange,
-    #[error("cooldown seconds must be between 30 and 3600")]
+    #[error("cooldown seconds must be between 5 and 3600")]
     CooldownOutOfRange,
 }
 
@@ -55,10 +55,10 @@ impl DistractionRule {
         {
             return Err(DistractionRuleError::ProcessNameIsPath);
         }
-        if !(5..=600).contains(&self.grace_seconds) {
+        if !(1..=600).contains(&self.grace_seconds) {
             return Err(DistractionRuleError::GraceOutOfRange);
         }
-        if !(30..=3600).contains(&self.cooldown_seconds) {
+        if !(5..=3600).contains(&self.cooldown_seconds) {
             return Err(DistractionRuleError::CooldownOutOfRange);
         }
         Ok(())
@@ -159,17 +159,20 @@ mod tests {
         );
 
         unsafe_path.process_name = Some("browser.exe".to_owned());
-        unsafe_path.grace_seconds = 4;
+        unsafe_path.grace_seconds = 0;
         assert_eq!(
             unsafe_path.validate(),
             Err(DistractionRuleError::GraceOutOfRange)
         );
 
-        unsafe_path.grace_seconds = 5;
-        unsafe_path.cooldown_seconds = 29;
+        unsafe_path.grace_seconds = 1;
+        unsafe_path.cooldown_seconds = 4;
         assert_eq!(
             unsafe_path.validate(),
             Err(DistractionRuleError::CooldownOutOfRange)
         );
+
+        unsafe_path.cooldown_seconds = 5;
+        assert_eq!(unsafe_path.validate(), Ok(()));
     }
 }

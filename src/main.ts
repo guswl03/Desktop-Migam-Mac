@@ -21,6 +21,7 @@ import { createPetSprite } from "./pet/sprite";
 import { mountTimer } from "./timer/timer-view";
 import { mountTodo } from "./todo/todo-view";
 import { invokeWhenReady } from "./tauri/invoke-when-ready";
+import { settingsHelp } from "./settings-help";
 import "./styles.css";
 
 const app = document.querySelector<HTMLDivElement>("#app");
@@ -140,11 +141,11 @@ function ruleRows(rules: DistractionRule[]): string {
             <label class="checkbox-row"><input name="rule-${index}-enabled" type="checkbox" ${rule.enabled ? "checked" : ""} /> 사용</label>
             <button class="danger-text" type="button" data-remove-rule="${escaped(rule.id)}">삭제</button>
           </div>
-          <label>규칙 이름<input name="rule-${index}-name" type="text" maxlength="60" value="${escaped(rule.name)}" required /></label>
-          <label>프로세스 파일명<input name="rule-${index}-process" type="text" maxlength="120" placeholder="chrome.exe" value="${escaped(rule.processName ?? "")}" /></label>
-          <label class="wide-field">창 제목에 포함<input name="rule-${index}-title" type="text" maxlength="200" placeholder="YouTube" value="${escaped(rule.windowTitle ?? "")}" /></label>
-          <label>유예 시간(초)<input name="rule-${index}-grace" type="number" min="5" max="600" value="${rule.graceSeconds}" required /></label>
-          <label>재감지 대기(초)<input name="rule-${index}-cooldown" type="number" min="30" max="3600" value="${rule.cooldownSeconds}" required /></label>
+          <label><span class="setting-label-text">규칙 이름 ${settingsHelp("ruleName")}</span><input name="rule-${index}-name" type="text" maxlength="60" value="${escaped(rule.name)}" required /></label>
+          <label><span class="setting-label-text">앱 실행 파일 ${settingsHelp("processName")}</span><input name="rule-${index}-process" type="text" maxlength="120" placeholder="chrome.exe" value="${escaped(rule.processName ?? "")}" /></label>
+          <label class="wide-field"><span class="setting-label-text">웹사이트 또는 창 이름 ${settingsHelp("windowTitle")}</span><input name="rule-${index}-title" type="text" maxlength="200" placeholder="YouTube" value="${escaped(rule.windowTitle ?? "")}" /></label>
+          <label><span class="setting-label-text">차단 전 대기 (초) ${settingsHelp("graceSeconds")}</span><input name="rule-${index}-grace" type="number" min="1" max="600" value="${rule.graceSeconds}" required /></label>
+          <label><span class="setting-label-text">다시 검사 (초) ${settingsHelp("cooldownSeconds")}</span><input name="rule-${index}-cooldown" type="number" min="5" max="3600" value="${rule.cooldownSeconds}" required /></label>
         </article>`,
     )
     .join("");
@@ -170,14 +171,6 @@ function renderSettings(
   let rules = settings.focusGuard.rules.map((rule) => ({ ...rule }));
   app!.innerHTML = `
     <main class="panel settings-panel">
-      <header class="debug-chrome settings-chrome">
-        <nav class="debug-menu" aria-label="설정 보기">
-          <span class="active">File</span><span>Home</span><span>View</span><span>Focus</span><span>Extensions</span>
-        </nav>
-        <div class="debug-ribbon" aria-hidden="true">
-          <span><b>⚙</b> General</span><span><b>◷</b> Timer</span><span><b>⌖</b> Focus Guard</span><span><b>⊘</b> Emergency</span>
-        </div>
-      </header>
       <section class="debug-document">
         <div class="debug-pane-title"><span>MigamDesktop.Settings</span><span aria-hidden="true">×</span></div>
         <div class="debug-command-line" aria-hidden="true"><span>0:000&gt;</span><span>.settings /local /schema:${settings.schemaVersion}</span><span class="debug-caret">_</span></div>
@@ -187,8 +180,8 @@ function renderSettings(
         <form id="settings-form">
         <fieldset>
           <legend>펫</legend>
-          <label>크기 (%)<input name="visualScalePercent" type="number" min="50" max="200" value="${settings.pet.visualScalePercent}" /></label>
-          <label>시스템 반응 기준
+          <label><span class="setting-label-text">펫 크기 (%) ${settingsHelp("petSize")}</span><input name="visualScalePercent" type="number" min="50" max="200" value="${settings.pet.visualScalePercent}" /></label>
+          <label><span class="setting-label-text">컴퓨터 상태에 따른 펫 반응 ${settingsHelp("resourceResponse")}</span>
             <select name="resourceResponseMode">
               <option value="off" ${settings.pet.resourceResponseMode === "off" ? "selected" : ""}>사용 안 함</option>
               <option value="cpu" ${settings.pet.resourceResponseMode === "cpu" ? "selected" : ""}>CPU 사용량</option>
@@ -197,24 +190,25 @@ function renderSettings(
             </select>
           </label>
           <p id="resource-status" class="detection-status" role="status">CPU --% · 메모리 --%</p>
+          <label class="checkbox-row"><input name="automaticPhotoDeliveryEnabled" type="checkbox" ${settings.pet.automaticPhotoDeliveryEnabled ? "checked" : ""} /> <span class="setting-label-text">자동 사진 배달 ${settingsHelp("automaticPhotoDelivery")}</span></label>
         </fieldset>
         <fieldset>
           <legend>뽀모도로</legend>
-          <label>집중 시간<input name="focusMinutes" type="number" min="1" max="120" value="${settings.pomodoro.focusMinutes}" /></label>
-          <label>짧은 휴식<input name="shortBreakMinutes" type="number" min="1" max="60" value="${settings.pomodoro.shortBreakMinutes}" /></label>
-          <label>긴 휴식<input name="longBreakMinutes" type="number" min="1" max="90" value="${settings.pomodoro.longBreakMinutes}" /></label>
-          <label>긴 휴식 주기<input name="sessionsBeforeLongBreak" type="number" min="1" max="12" value="${settings.pomodoro.sessionsBeforeLongBreak}" /></label>
+          <label><span class="setting-label-text">집중 시간 (분) ${settingsHelp("focusMinutes")}</span><input name="focusMinutes" type="number" min="1" max="120" value="${settings.pomodoro.focusMinutes}" /></label>
+          <label><span class="setting-label-text">짧은 휴식 (분) ${settingsHelp("shortBreakMinutes")}</span><input name="shortBreakMinutes" type="number" min="1" max="60" value="${settings.pomodoro.shortBreakMinutes}" /></label>
+          <label><span class="setting-label-text">긴 휴식 (분) ${settingsHelp("longBreakMinutes")}</span><input name="longBreakMinutes" type="number" min="1" max="90" value="${settings.pomodoro.longBreakMinutes}" /></label>
+          <label><span class="setting-label-text">긴 휴식 주기 (회) ${settingsHelp("longBreakCycle")}</span><input name="sessionsBeforeLongBreak" type="number" min="1" max="12" value="${settings.pomodoro.sessionsBeforeLongBreak}" /></label>
         </fieldset>
         <fieldset>
           <legend>집중 보호</legend>
-          <label class="checkbox-row"><input name="interventionEnabled" type="checkbox" ${settings.focusGuard.interventionEnabled ? "checked" : ""} ${rules.length === 0 ? "disabled" : ""} /> 집중 중 규칙 일치 감지 사용</label>
+          <label class="checkbox-row"><input name="interventionEnabled" type="checkbox" ${settings.focusGuard.interventionEnabled ? "checked" : ""} ${rules.length === 0 ? "disabled" : ""} /> <span class="setting-label-text">집중 중 방해 앱 감지 ${settingsHelp("intervention")}</span></label>
           <p class="muted">일치 상태가 유예 시간 동안 유지되면 왼쪽에서 네모 캐릭터가 날아와 창을 최소화합니다. 브라우저 사이트는 창 제목 문자열만 확인합니다.</p>
           <p id="detection-status" class="detection-status" role="status">집중 시작 전 · 감지 대기</p>
         </fieldset>
         <section class="rules-section" aria-labelledby="rules-heading">
           <div class="section-heading"><h2 id="rules-heading">방해 규칙</h2><button id="add-rule" class="secondary" type="button">규칙 추가</button></div>
           <div id="rule-list" class="rule-list">${ruleRows(rules)}</div>
-          <p class="muted">프로세스 파일명과 창 제목 중 하나 이상을 입력하세요. 둘 다 입력하면 두 조건이 모두 맞아야 합니다.</p>
+          <p class="muted">앱 실행 파일과 웹사이트 또는 창 이름 중 하나 이상을 입력하세요. 둘 다 입력하면 두 조건이 모두 맞아야 합니다.</p>
         </section>
           <div class="actions"><button type="submit">설정 적용</button><span id="save-status" role="status"></span></div>
         </form>
@@ -281,6 +275,7 @@ function renderSettings(
       pet: {
         visualScalePercent: numberValue(values, "visualScalePercent"),
         resourceResponseMode: String(values.get("resourceResponseMode")) as ResourceResponseMode,
+        automaticPhotoDeliveryEnabled: values.has("automaticPhotoDeliveryEnabled"),
       },
       pomodoro: {
         focusMinutes: numberValue(values, "focusMinutes"),

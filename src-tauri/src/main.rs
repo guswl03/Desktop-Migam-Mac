@@ -1,5 +1,5 @@
 #![cfg_attr(not(debug_assertions), windows_subsystem = "windows")]
 
 fn main() {
-    desktop_pet_mvp_lib::run();
+    migam_desktop_lib::run();
 }

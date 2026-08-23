@@ -20,6 +20,12 @@ pub struct PetSettings {
     pub visual_scale_percent: u8,
     #[serde(default)]
     pub resource_response_mode: ResourceResponseMode,
+    #[serde(default = "default_true")]
+    pub automatic_photo_delivery_enabled: bool,
+}
+
+const fn default_true() -> bool {
+    true
 }
 
 #[derive(Clone, Copy, Debug, Default, Deserialize, Eq, PartialEq, Serialize)]
@@ -31,7 +37,6 @@ pub enum ResourceResponseMode {
     Memory,
     Combined,
 }
-
 #[derive(Clone, Debug, Deserialize, Eq, PartialEq, Serialize)]
 #[serde(rename_all = "camelCase")]
 pub struct PomodoroSettings {
@@ -102,6 +107,7 @@ impl Default for Settings {
             pet: PetSettings {
                 visual_scale_percent: 100,
                 resource_response_mode: ResourceResponseMode::Off,
+                automatic_photo_delivery_enabled: true,
             },
             pomodoro: PomodoroSettings {
                 focus_minutes: 25,
@@ -191,6 +197,7 @@ mod tests {
             settings.pet.resource_response_mode,
             ResourceResponseMode::Off
         );
+        assert!(settings.pet.automatic_photo_delivery_enabled);
     }
 
     #[test]
@@ -265,5 +272,6 @@ mod tests {
             settings.pet.resource_response_mode,
             ResourceResponseMode::Off
         );
+        assert!(settings.pet.automatic_photo_delivery_enabled);
     }
 }

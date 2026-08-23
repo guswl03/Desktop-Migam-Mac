@@ -1,4 +1,5 @@
 import { invoke } from "@tauri-apps/api/core";
+import { contextUtilityCommand, showUtilityThenHideMenu } from "./context-menu-actions";
 import { invokeWhenReady } from "../tauri/invoke-when-ready";
 import { listen } from "@tauri-apps/api/event";
 import type { SystemMetricsState } from "../contracts";
@@ -74,12 +75,23 @@ export async function mountPetContextMenu(container: HTMLElement): Promise<() =>
   };
   const runAction = async (action: string): Promise<void> => {
     footer.textContent = `Executing ${action}...`;
+    const utility = contextUtilityCommand(action);
+    if (utility) {
+      await showUtilityThenHideMenu(
+        action,
+        async () => {
+          if (utility.command === "toggle_timer_bubble") {
+            await invoke(utility.command);
+          } else {
+            await invoke(utility.command, { label: utility.label });
+          }
+        },
+        async () => { await hide(); },
+      );
+      return;
+    }
     await hide().catch(() => undefined);
-    if (action === "gamcha") await invoke("show_utility_window", { label: "gamcha" });
-    else if (action === "photo") await invoke("start_photo_delivery");
-    else if (action === "timer") await invoke("show_utility_window", { label: "timer" });
-    else if (action === "todo") await invoke("show_utility_window", { label: "todo" });
-    else if (action === "settings") await invoke("show_utility_window", { label: "settings" });
+    if (action === "photo") await invoke("start_photo_delivery");
     else if (action === "start") {
       await invoke("start_focus");
       await invoke("show_utility_window", { label: "timer" });
