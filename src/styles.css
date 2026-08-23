@@ -99,10 +99,10 @@ body[data-window="photo-delivery"] #app {
   animation: photo-delivery-load-rattle 900ms ease-in-out infinite;
 }
 .photo-delivery-rig.delivered .photo-delivery-pet {
-  animation: photo-delivery-pet-leave 3.5s ease-in both;
+  animation: photo-delivery-pet-leave 1.5s ease-out both;
 }
 .photo-delivery-rig.delivered.from-left .photo-delivery-pet {
-  animation: photo-delivery-pet-leave-left 3.5s ease-in both;
+  animation: photo-delivery-pet-leave-left 1.5s ease-out both;
 }
 .photo-delivery-rig.settled .photo-delivery-pet {
   display: none;
@@ -166,7 +166,7 @@ body[data-window="photo-delivery"] #app {
 }
 @keyframes photo-delivery-pet-leave-left {
   0% { opacity: 1; transform: scaleX(-1) translateX(0); }
-  100% { opacity: 0; transform: scaleX(-1) translateX(calc(50vw + 180px)); }
+  100% { opacity: 0; transform: scaleX(-1) translateX(calc(-50vw - 180px)); }
 }
 .pet-shell {
   display: grid;
@@ -440,6 +440,7 @@ body[data-window="settings"], body[data-window="timer"] {
 
 body[data-window="settings"] .settings-panel { background: #cfd1d5; }
 .settings-panel .debug-document { margin: 3px 4px; }
+.settings-panel .debug-document > .debug-command-line { margin-right: 0; margin-left: 0; }
 .settings-panel .debug-document > :not(.debug-pane-title):not(.debug-command-line) {
   margin-right: 7px;
   margin-left: 7px;
@@ -1351,6 +1352,10 @@ body[data-window="gamcha"] .gamcha-rarity {
 body[data-window="gamcha"] .gamcha-name {
   bottom: 12px;
   color: #111;
+  font-family: "Segoe UI Variable Display", "Malgun Gothic", "맑은 고딕", sans-serif;
+  font-weight: 800;
+  line-height: 1.2;
+  letter-spacing: -.04em;
   text-shadow: -2px -2px 0 #fff, 2px -2px 0 #fff, -2px 2px 0 #fff, 2px 2px 0 #fff, 0 3px 8px #fff;
 }
 body[data-window="gamcha"] .gamcha-new {
@@ -1369,7 +1374,7 @@ body[data-window="gamcha"] .gamcha-draw {
   background: rgb(18 18 24 / .88);
   box-shadow: 0 7px 22px rgb(0 0 0 / .34);
   color: #fff;
-  font: 700 clamp(15px, 1.25vw, 19px) "Segoe UI Variable Display", "Segoe UI", "Malgun Gothic", sans-serif;
+  font: 800 clamp(15px, 1.25vw, 19px) "Cascadia Mono", Consolas, "Segoe UI", sans-serif;
   letter-spacing: .035em;
   text-shadow: none;
 }
@@ -1433,7 +1438,7 @@ body[data-window="gamcha"] .gamcha-draw-shell .gamcha-draw:active:not(:disabled)
 body[data-window="gamcha"] .gamcha-topbar {
   position: fixed;
   z-index: 13;
-  top: max(16px, calc(50% - 285px));
+  top: 18px;
   left: 50%;
   display: flex;
   align-items: center;
@@ -1464,7 +1469,7 @@ body[data-window="gamcha"] .gamcha-topbar .gamcha-tabs {
   background: transparent;
   box-shadow: none;
 }
-body[data-window="gamcha"] .gamcha-topbar .gamcha-tabs button { min-width: 94px; }
+body[data-window="gamcha"] .gamcha-topbar .gamcha-tabs button { width: 112px; min-width: 112px; box-sizing: border-box; }
 body[data-window="gamcha"] .gamcha-topbar .gamcha-close {
   position: static;
   width: 35px;
@@ -1488,9 +1493,6 @@ body[data-window="gamcha"] .gamcha-new {
   line-height: 1.1;
   text-align: right;
   transform: none;
-}
-body[data-window="gamcha"] .gamcha-bubble[data-view="inventory"] .gamcha-topbar {
-  top: 18px;
 }
 .gamcha-tabs {
   position: fixed;
@@ -1587,6 +1589,16 @@ body[data-window="gamcha"] .gamcha-inventory-card[data-rarity="legendary"] { --c
 body[data-window="gamcha"] .gamcha-inventory-card[data-rarity="special"] { --card-rarity: #ff3f86; }
 body[data-window="gamcha"] .gamcha-inventory-card:hover { border-color: var(--card-rarity); background: #3a3a43; }
 body[data-window="gamcha"] .gamcha-inventory-card.selected { border: 2px solid var(--card-rarity); box-shadow: inset 0 0 0 1px #111, 0 0 12px var(--card-rarity); }
+body[data-window="gamcha"] .gamcha-inventory-card.locked {
+  cursor: not-allowed;
+  border-color: #45454b;
+  background: #25252a;
+  color: #777;
+}
+body[data-window="gamcha"] .gamcha-inventory-card.locked:hover { border-color: #45454b; background: #25252a; }
+body[data-window="gamcha"] .gamcha-inventory-card.locked img { filter: grayscale(1) brightness(.3); opacity: .48; }
+body[data-window="gamcha"] .gamcha-inventory-card.locked small { color: #666; }
+body[data-window="gamcha"] .gamcha-inventory-card .locked-badge { background: #4a4a50; color: #bbb; }
 .gamcha-inventory-card img { width: 86px; height: 86px; object-fit: contain; }
 .gamcha-inventory-card strong { overflow: hidden; max-width: 100%; font-size: 11px; text-overflow: ellipsis; white-space: nowrap; }
 .gamcha-inventory-card small { color: var(--card-rarity); font-size: 9px; }
@@ -1610,7 +1622,10 @@ body[data-window="gamcha"] .gamcha-inventory-card.selected { border: 2px solid v
   background: #29292f;
 }
 .gamcha-inventory-preview { display: grid; min-height: 0; place-items: center; overflow: hidden; border: 1px solid #555; background: repeating-conic-gradient(#e7e7e7 0 25%, #f5f5f5 0 50%) 0 / 22px 22px; }
-.gamcha-inventory-preview .pet-sprite { pointer-events: none; transform: scale(3); transform-origin: center; filter: drop-shadow(0 7px 3px rgb(0 0 0 / .3)); }
+.gamcha-inventory-preview .pet-sprite { pointer-events: auto; transform: scale(3); transform-origin: center; filter: drop-shadow(0 7px 3px rgb(0 0 0 / .3)); }
+.gamcha-inventory-preview .pet-costume { cursor: grab; pointer-events: auto; touch-action: none; }
+.gamcha-inventory-preview.dragging-costume,
+.gamcha-inventory-preview.dragging-costume .pet-costume { cursor: grabbing; user-select: none; }
 .gamcha-inventory-info { display: grid; grid-template-columns: 1fr auto; align-items: center; gap: 5px 10px; }
 .gamcha-inventory-info > span { color: #7fd7ff; font-size: 10px; }
 .gamcha-inventory-info > strong { grid-column: 1 / -1; font: 700 17px "Segoe UI", sans-serif; }
@@ -1798,7 +1813,7 @@ body[data-window="todo"] .todo-quick-add > label { display: block; margin-bottom
 body[data-window="todo"] .todo-quick-add > div { display: grid; grid-template-columns: 1fr 58px; gap: 4px; }
 body[data-window="todo"] .todo-quick-add input { height: 31px; padding: 4px 7px; border: 1px solid #777a80; border-radius: 0; outline: none; background: #fff; font: 11px "Malgun Gothic", sans-serif; }
 body[data-window="todo"] .todo-quick-add input:focus { border-color: #0067c0; box-shadow: inset 0 0 0 1px #7eb9ea; }
-body[data-window="todo"] .todo-quick-add button { min-width: 0; background: linear-gradient(#fafafa, #dedfe2); color: #111; font-size: 10px; }
+body[data-window="todo"] .todo-quick-add button { min-width: 58px; white-space: nowrap; background: linear-gradient(#fafafa, #dedfe2); color: #111; font-size: 10px; }
 body[data-window="todo"] .todo-section-heading { min-height: 29px; padding: 7px 9px 0; }
 body[data-window="todo"] .todo-section-heading strong { padding: 3px 8px; border: 1px solid #8e9197; border-bottom: 0; background: #fff; font: 10px Consolas, monospace; }
 body[data-window="todo"] .todo-section-heading button { padding: 3px 7px; background: linear-gradient(#fafafa, #dedfe2); color: #111; font-size: 9px; }
@@ -1819,3 +1834,139 @@ body[data-window="todo"] .todo-result-card button { padding: 4px 2px; font-size:
 body[data-window="todo"] .todo-app-celebration { margin: 5px 9px 0; padding: 6px; border: 2px solid #111; border-radius: 0; font-size: 12px; }
 body[data-window="todo"] .todo-debug-statusbar { display: flex; min-height: 23px; align-items: center; justify-content: space-between; padding: 0 5px 0 7px; border-top: 1px solid #4f535a; background: #0067b8; color: #fff; font: 9px Consolas, monospace; }
 body[data-window="todo"] .todo-debug-statusbar button { padding: 2px 7px; border-color: #fff; background: #0067b8; box-shadow: none; color: #fff; font: 9px Consolas, monospace; }
+/* Keep draw result metadata together instead of floating at the viewport edge. */
+body[data-window="gamcha"] .gamcha-result-caption {
+  position: absolute;
+  z-index: 8;
+  bottom: 12px;
+  left: 50%;
+  display: flex;
+  width: min(620px, 64vw);
+  flex-direction: column;
+  align-items: center;
+  gap: 3px;
+  transform: translateX(-50%);
+  pointer-events: none;
+}
+body[data-window="gamcha"] .gamcha-result-caption .gamcha-rarity {
+  position: static;
+  padding: 0;
+  border: 0;
+  background: transparent;
+  box-shadow: none;
+  color: var(--rarity);
+  font-size: 13px;
+  line-height: 1;
+  transform: none;
+  text-shadow: 1px 1px 0 #fff, -1px -1px 0 #fff;
+}
+body[data-window="gamcha"] .gamcha-result-caption .gamcha-name {
+  position: static;
+  margin: 0;
+  font-size: clamp(18px, 2vw, 30px);
+  line-height: 1.2;
+}
+.gamcha-notice-open {
+  display: flex;
+  width: 100%;
+  height: 100%;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 3px 8px;
+  border: 0;
+  background: transparent;
+  color: inherit;
+  cursor: pointer;
+}
+.gamcha-notice-close {
+  position: absolute;
+  z-index: 3;
+  top: 5px;
+  right: 6px;
+  display: grid;
+  width: 18px;
+  height: 18px;
+  padding: 0;
+  place-items: center;
+  border: 1px solid #777;
+  border-radius: 2px;
+  background: #fff;
+  color: #111;
+  font: 700 12px/1 Arial, sans-serif;
+  opacity: 0;
+  pointer-events: none;
+  cursor: pointer;
+  transition: opacity 120ms ease;
+}
+.gamcha-notice-bubble:hover .gamcha-notice-close,
+.gamcha-notice-bubble:focus-within .gamcha-notice-close { opacity: 1; pointer-events: auto; }
+/* Contextual explanations for settings fields. */
+body[data-window="settings"] .setting-label-text {
+  display: inline-flex;
+  width: fit-content;
+  align-items: center;
+  gap: 5px;
+}
+body[data-window="settings"] .settings-help {
+  position: relative;
+  z-index: 20;
+  display: inline-grid;
+  width: 15px;
+  height: 15px;
+  flex: none;
+  place-items: center;
+  border: 1px solid #676a70;
+  border-radius: 50%;
+  background: #f7f7f7;
+  color: #075ea8;
+  font: 700 10px/1 Consolas, monospace;
+  cursor: help;
+}
+body[data-window="settings"] .settings-help::before,
+body[data-window="settings"] .settings-help::after {
+  position: absolute;
+  bottom: calc(100% + 7px);
+  left: -5px;
+  visibility: hidden;
+  opacity: 0;
+  pointer-events: none;
+}
+body[data-window="settings"] .settings-help::before {
+  z-index: 22;
+  width: min(280px, 55vw);
+  padding: 8px 10px;
+  border: 1px solid #35383d;
+  background: #fffde8;
+  box-shadow: 3px 3px 0 rgb(0 0 0 / .24);
+  color: #111;
+  font: 11px/1.45 "Segoe UI", "Malgun Gothic", sans-serif;
+  font-weight: 400;
+  white-space: normal;
+  content: attr(data-tooltip);
+}
+body[data-window="settings"] .settings-help::after {
+  z-index: 23;
+  bottom: calc(100% + 2px);
+  left: 2px;
+  border-top: 6px solid #35383d;
+  border-right: 5px solid transparent;
+  border-left: 5px solid transparent;
+  content: "";
+}
+body[data-window="settings"] .settings-help:hover::before,
+body[data-window="settings"] .settings-help:hover::after,
+body[data-window="settings"] .settings-help:focus::before,
+body[data-window="settings"] .settings-help:focus::after {
+  visibility: visible;
+  opacity: 1;
+}
+body[data-window="settings"] .settings-help:focus {
+  outline: 2px solid #0878d1;
+  outline-offset: 1px;
+}
+
+.pet-dragging .timer-bubble,
+.pet-dragging .gamcha-notice-bubble {
+  visibility: hidden;
+}

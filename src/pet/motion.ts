@@ -98,3 +98,8 @@ export function advanceToward(
 
   return current + Math.sign(distance) * maximumStep;
 }
+export type PetTimerPhase = "stopped" | "focus" | "shortBreak" | "longBreak" | "paused";
+
+export function isPetMotionLocked(phase: PetTimerPhase): boolean {
+  return phase === "focus" || phase === "paused";
+}

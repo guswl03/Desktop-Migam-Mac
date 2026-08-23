@@ -7,7 +7,7 @@ import {
 } from "../costumes/alignment";
 import { createPetSprite } from "../pet/sprite";
 import { invokeWhenReady } from "../tauri/invoke-when-ready";
-import { rarityLabel, rouletteDelay, type GamchaRarity } from "./gamcha-model";
+import { costumeDragAlignment, GAMCHA_NOTICE_DURATION_MILLISECONDS, rarityLabel, rouletteDelay, type GamchaRarity } from "./gamcha-model";
 
 interface GamchaSnapshot {
   tickets: number;
@@ -47,7 +47,7 @@ export async function mountGamcha(container: HTMLElement): Promise<() => void> {
           <div class="gamcha-ticket-row"><span>TICKET</span><strong id="gamcha-tickets">0</strong></div>
           <nav class="gamcha-tabs" aria-label="GAMCHA 화면">
             <button class="active" type="button" data-gamcha-tab="draw" aria-selected="true">GAMCHA</button>
-            <button type="button" data-gamcha-tab="inventory" aria-selected="false">INVENTORY <span id="gamcha-inventory-count">0</span></button>
+            <button type="button" data-gamcha-tab="inventory" aria-selected="false">도감 <span id="gamcha-inventory-count">0</span></button>
           </nav>
           <button class="gamcha-close" type="button" aria-label="GAMCHA 닫기">×</button>
         </div>
@@ -59,15 +59,17 @@ export async function mountGamcha(container: HTMLElement): Promise<() => void> {
           <div class="gamcha-stage" aria-live="polite">
             <div class="gamcha-rays" aria-hidden="true"></div>
             <img id="gamcha-costume" alt="추첨한 코스튬" hidden />
-            <p id="gamcha-rarity" class="gamcha-rarity">READY</p>
-            <p id="gamcha-name" class="gamcha-name">집중 보상을 뽑아보세요</p>
+            <div class="gamcha-result-caption">
+              <p id="gamcha-rarity" class="gamcha-rarity" hidden></p>
+              <p id="gamcha-name" class="gamcha-name">집중 보상을 뽑아보세요</p>
+            </div>
             <p id="gamcha-new" class="gamcha-new"></p>
           </div>
           <button id="gamcha-draw" class="gamcha-draw" type="button">GAMCHA 돌리기!</button>
         </div>
         <section class="gamcha-inventory" aria-labelledby="gamcha-inventory-heading" hidden>
-          <header><div><p>OWNED COSTUMES</p><h2 id="gamcha-inventory-heading">인벤토리</h2></div><span id="gamcha-inventory-summary">0개 보유</span></header>
-          <div id="gamcha-inventory-grid" class="gamcha-inventory-grid" role="listbox" aria-label="보유 코스튬"></div>
+          <header><div><p>COSTUME COLLECTION</p><h2 id="gamcha-inventory-heading">코스튬 도감</h2></div><span id="gamcha-inventory-summary">획득 0 / 156</span></header>
+          <div id="gamcha-inventory-grid" class="gamcha-inventory-grid" role="listbox" aria-label="전체 코스튬 도감"></div>
           <aside class="gamcha-inventory-detail">
             <div id="gamcha-inventory-preview" class="gamcha-inventory-preview" aria-label="선택 코스튬 착용 미리보기"></div>
             <div class="gamcha-inventory-info">
@@ -130,7 +132,13 @@ export async function mountGamcha(container: HTMLElement): Promise<() => void> {
     costumeAlignments: {},
   };
   let alignmentSaveTimer: number | undefined;
-  let selectedCostumeId: string | null = null;
+  let alignmentDrag: {
+    pointerId: number;
+    startClientX: number;
+    startClientY: number;
+    startX: number;
+    startY: number;
+  } | null = null;  let selectedCostumeId: string | null = null;
   let selectionInitialized = false;
 
   const selectedAlignment = (): CostumeAlignment | null => {
@@ -153,6 +161,7 @@ export async function mountGamcha(container: HTMLElement): Promise<() => void> {
   };
 
   const renderInventory = (): void => {
+    const ownedIds = new Set(currentSnapshot.ownedCostumeIds);
     const ownedCostumes = currentSnapshot.ownedCostumeIds.flatMap((id) => {
       const costume = costumeById.get(id);
       return costume ? [costume] : [];
@@ -161,19 +170,23 @@ export async function mountGamcha(container: HTMLElement): Promise<() => void> {
       selectedCostumeId = null;
     }
     inventoryCount.textContent = String(ownedCostumes.length);
-    inventorySummary.textContent = `${ownedCostumes.length} / ${costumes.length}개 보유`;
+    inventorySummary.textContent = `획득 ${ownedCostumes.length} / ${costumes.length}`;
 
     const createCard = (costume: (typeof costumes)[number] | null): HTMLButtonElement => {
       const card = document.createElement("button");
       const costumeId = costume?.id ?? "";
       const selected = selectedCostumeId === (costume?.id ?? null);
       const equipped = currentSnapshot.equippedCostumeId === (costume?.id ?? null);
+      const unlocked = !costume || ownedIds.has(costume.id);
       card.type = "button";
       card.className = "gamcha-inventory-card";
       card.dataset.costumeId = costumeId;
       card.dataset.rarity = costume?.rarity ?? "default";
       card.setAttribute("role", "option");
       card.setAttribute("aria-selected", String(selected));
+      card.setAttribute("aria-disabled", String(!unlocked));
+      card.disabled = !unlocked;
+      card.classList.toggle("locked", !unlocked);
       if (selected) card.classList.add("selected");
       if (equipped) card.classList.add("equipped");
       if (costume) {
@@ -193,6 +206,12 @@ export async function mountGamcha(container: HTMLElement): Promise<() => void> {
       const grade = document.createElement("small");
       grade.textContent = costume ? rarityLabel(costume.rarity) : "DEFAULT";
       card.append(grade);
+      if (!unlocked) {
+        const lock = document.createElement("i");
+        lock.className = "locked-badge";
+        lock.textContent = "미획득";
+        card.append(lock);
+      }
       if (equipped) {
         const badge = document.createElement("i");
         badge.textContent = "착용 중";
@@ -200,9 +219,10 @@ export async function mountGamcha(container: HTMLElement): Promise<() => void> {
       }
       return card;
     };
-    inventoryGrid.replaceChildren(createCard(null), ...ownedCostumes.map(createCard));
+    inventoryGrid.replaceChildren(createCard(null), ...costumes.map(createCard));
 
-    const selected = costumeById.get(selectedCostumeId ?? "");
+    const selectedCandidate = costumeById.get(selectedCostumeId ?? "");
+    const selected = selectedCandidate && ownedIds.has(selectedCandidate.id) ? selectedCandidate : undefined;
     if (selected) {
       inventoryPet.setCostume({
         url: selected.url,
@@ -259,6 +279,7 @@ export async function mountGamcha(container: HTMLElement): Promise<() => void> {
     image.hidden = false;
     image.src = costume.url;
     image.alt = costume.name;
+    rarity.hidden = false;
     rarity.textContent = rarityLabel(costume.rarity);
     name.textContent = costume.name;
     bubble.dataset.rarity = costume.rarity;
@@ -310,7 +331,7 @@ export async function mountGamcha(container: HTMLElement): Promise<() => void> {
   drawButton.addEventListener("click", () => void draw());
   inventoryGrid.addEventListener("click", (event) => {
     const card = (event.target as Element).closest<HTMLButtonElement>("[data-costume-id]");
-    if (!card) return;
+    if (!card || card.disabled) return;
     selectedCostumeId = card.dataset.costumeId || null;
     renderInventory();
   });
@@ -352,6 +373,43 @@ export async function mountGamcha(container: HTMLElement): Promise<() => void> {
       });
     }, 120);
   };
+  inventoryPreview.addEventListener("pointerdown", (event) => {
+    const costumeImage = (event.target as Element).closest<HTMLElement>(".pet-costume");
+    const alignment = selectedAlignment();
+    if (!costumeImage || !alignment) return;
+    event.preventDefault();
+    inventoryPreview.setPointerCapture(event.pointerId);
+    inventoryPreview.classList.add("dragging-costume");
+    alignmentDrag = {
+      pointerId: event.pointerId,
+      startClientX: event.clientX,
+      startClientY: event.clientY,
+      startX: alignment.x,
+      startY: alignment.y,
+    };
+  });
+  inventoryPreview.addEventListener("pointermove", (event) => {
+    if (!alignmentDrag || alignmentDrag.pointerId !== event.pointerId) return;
+    const next = costumeDragAlignment(
+      { x: alignmentDrag.startX, y: alignmentDrag.startY },
+      event.clientX - alignmentDrag.startClientX,
+      event.clientY - alignmentDrag.startClientY,
+      3,
+    );
+    alignX.value = String(next.x);
+    alignY.value = String(next.y);
+    saveAlignment();
+  });
+  const stopCostumeDrag = (event: PointerEvent): void => {
+    if (!alignmentDrag || alignmentDrag.pointerId !== event.pointerId) return;
+    if (inventoryPreview.hasPointerCapture(event.pointerId)) {
+      inventoryPreview.releasePointerCapture(event.pointerId);
+    }
+    alignmentDrag = null;
+    inventoryPreview.classList.remove("dragging-costume");
+  };
+  inventoryPreview.addEventListener("pointerup", stopCostumeDrag);
+  inventoryPreview.addEventListener("pointercancel", stopCostumeDrag);
   alignX.addEventListener("input", saveAlignment);
   alignY.addEventListener("input", saveAlignment);
   alignSize.addEventListener("input", saveAlignment);
@@ -407,28 +465,59 @@ export async function mountGamcha(container: HTMLElement): Promise<() => void> {
 export async function mountGamchaNotice(container: HTMLElement): Promise<() => void> {
   container.innerHTML = `
     <main class="gamcha-notice-panel">
-      <button class="gamcha-notice-bubble" type="button" aria-label="GAMCHA 보상 열기">
-        <span class="gamcha-notice-sparkles" aria-hidden="true">✦ ✧ ✦</span>
-        <strong><span>G</span><span>A</span><span>M</span><span>C</span><span>H</span><span>A!</span></strong>
-        <small>TICKET <b id="gamcha-notice-tickets">1</b> · 눌러서 뽑기</small>
-      </button>
+      <section class="gamcha-notice-bubble" aria-label="GAMCHA 보상 알림">
+        <button class="gamcha-notice-open" type="button" aria-label="GAMCHA 보상 열기">
+          <span class="gamcha-notice-sparkles" aria-hidden="true">✦ ✧ ✦</span>
+          <strong><span>G</span><span>A</span><span>M</span><span>C</span><span>H</span><span>A!</span></strong>
+          <small>TICKET <b id="gamcha-notice-tickets">1</b> · 눌러서 뽑기</small>
+        </button>
+        <button class="gamcha-notice-close" type="button" aria-label="GAMCHA 알림 닫기">×</button>
+      </section>
     </main>`;
   const tickets = container.querySelector<HTMLElement>("#gamcha-notice-tickets")!;
+  const openButton = container.querySelector<HTMLButtonElement>(".gamcha-notice-open")!;
+  const closeButton = container.querySelector<HTMLButtonElement>(".gamcha-notice-close")!;
+  let dismissTimer = 0;
+  const restoreTimerBubble = async (): Promise<void> => {
+    const timer = await invoke<{ phase: string }>("get_timer_state");
+    if (timer.phase !== "stopped") {
+      await invoke("show_utility_window", { label: "timer" });
+    }
+  };
+  const hideNotice = (): void => {
+    window.clearTimeout(dismissTimer);
+    void invoke("hide_utility_window", { label: "gamcha-notice" })
+      .then(restoreTimerBubble)
+      .catch(() => undefined);
+  };
+  const openGamcha = (): void => {
+    window.clearTimeout(dismissTimer);
+    void invoke("show_utility_window", { label: "gamcha" });
+  };
+  const scheduleDismiss = (): void => {
+    window.clearTimeout(dismissTimer);
+    dismissTimer = window.setTimeout(hideNotice, GAMCHA_NOTICE_DURATION_MILLISECONDS);
+  };
   const render = (snapshot: GamchaSnapshot): void => {
     tickets.textContent = String(snapshot.tickets);
   };
-  container
-    .querySelector<HTMLButtonElement>(".gamcha-notice-bubble")
-    ?.addEventListener("click", () => {
-      void invoke("show_utility_window", { label: "gamcha" });
-    });
+  openButton.addEventListener("click", openGamcha);
+  closeButton.addEventListener("click", hideNotice);
   render(await invokeWhenReady<GamchaSnapshot>("get_gamcha_state"));
-  const unlisten = await listen<GamchaSnapshot>("gamcha://ticket-earned", ({ payload }) =>
-    render(payload),
-  );
+  const unlisten = await listen<GamchaSnapshot>("gamcha://ticket-earned", ({ payload }) => {
+    render(payload);
+    scheduleDismiss();
+  });
+  const unlistenDrag = await listen<{ dragging: boolean }>("pet://drag-state", ({ payload }) => {
+    container.classList.toggle("pet-dragging", payload.dragging);
+  }).catch(() => () => undefined);
   const positionTimer = window.setInterval(() => void invoke("position_gamcha_bubble"), 250);
   return () => {
+    window.clearTimeout(dismissTimer);
     window.clearInterval(positionTimer);
+    openButton.removeEventListener("click", openGamcha);
+    closeButton.removeEventListener("click", hideNotice);
     unlisten();
+    unlistenDrag();
   };
 }

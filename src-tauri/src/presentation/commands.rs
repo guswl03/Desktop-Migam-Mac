@@ -57,6 +57,7 @@ pub fn save_settings(
         .write()
         .map_err(|_| "settings state is unavailable".to_owned())? = normalized.clone();
     let _ = app.emit("settings://saved", &normalized);
+
     Ok(normalized)
 }
 
@@ -390,7 +391,21 @@ fn prepare_photo_delivery_overlay(app: &AppHandle) -> Result<(), String> {
 }
 
 #[tauri::command]
-pub fn start_photo_delivery(app: AppHandle, state: State<'_, AppState>) -> Result<bool, String> {
+pub fn start_photo_delivery(
+    app: AppHandle,
+    state: State<'_, AppState>,
+    automatic: Option<bool>,
+) -> Result<bool, String> {
+    if automatic.unwrap_or(false)
+        && !state
+            .settings
+            .read()
+            .map_err(|_| "settings state is unavailable".to_owned())?
+            .pet
+            .automatic_photo_delivery_enabled
+    {
+        return Ok(false);
+    }
     if state.emergency_stopped.load(Ordering::SeqCst) {
         return Ok(false);
     }
@@ -532,6 +547,9 @@ pub fn position_timer_bubble(app: AppHandle) -> Result<(), String> {
     place_timer_bubble(&app)
 }
 
+fn gamcha_notice_desired_y(pet_y: i32, notice_height: i32) -> i32 {
+    pet_y - notice_height + 12
+}
 pub fn place_gamcha_notice_bubble(app: &AppHandle) -> Result<(), String> {
     let pet = app
         .get_webview_window("pet")
@@ -558,7 +576,7 @@ pub fn place_gamcha_notice_bubble(app: &AppHandle) -> Result<(), String> {
     let maximum_x = minimum_x + work_area.size.width as i32 - gamcha_size.width as i32;
     let maximum_y = minimum_y + work_area.size.height as i32 - gamcha_size.height as i32;
     let desired_x = pet_position.x + pet_size.width as i32 / 2 - gamcha_size.width as i32 / 2;
-    let desired_y = pet_position.y - gamcha_size.height as i32 + 14;
+    let desired_y = gamcha_notice_desired_y(pet_position.y, gamcha_size.height as i32);
     gamcha
         .set_position(tauri::PhysicalPosition::new(
             desired_x.clamp(minimum_x, maximum_x.max(minimum_x)),
@@ -568,6 +586,9 @@ pub fn place_gamcha_notice_bubble(app: &AppHandle) -> Result<(), String> {
 }
 
 pub fn show_gamcha_reward(app: &AppHandle) -> Result<(), String> {
+    if let Some(timer) = app.get_webview_window("timer") {
+        let _ = timer.hide();
+    }
     place_gamcha_notice_bubble(app)?;
     app.get_webview_window("gamcha-notice")
         .ok_or_else(|| "GAMCHA notice is unavailable".to_owned())?
@@ -638,11 +659,35 @@ fn prepare_gamcha_overlay(app: &AppHandle) -> Result<(), String> {
         .set_fullscreen(false)
         .map_err(|_| "GAMCHA overlay could not be reset".to_owned())?;
     gamcha
+        .set_always_on_top(false)
+        .map_err(|_| "GAMCHA overlay stacking could not be reset".to_owned())?;
+    gamcha
         .set_position(work_area.position)
         .map_err(|_| "GAMCHA monitor could not be selected".to_owned())?;
     gamcha
         .set_size(work_area.size)
         .map_err(|_| "GAMCHA overlay could not fit the work area".to_owned())
+}
+
+#[tauri::command]
+pub fn toggle_timer_bubble(app: AppHandle) -> Result<bool, String> {
+    let timer = app
+        .get_webview_window("timer")
+        .ok_or_else(|| "timer window is unavailable".to_owned())?;
+    if timer
+        .is_visible()
+        .map_err(|_| "timer visibility is unavailable".to_owned())?
+    {
+        timer
+            .hide()
+            .map_err(|_| "timer window could not be hidden".to_owned())?;
+        return Ok(false);
+    }
+
+    show_utility_window(app.clone(), "timer".to_owned())?;
+    timer
+        .is_visible()
+        .map_err(|_| "timer visibility is unavailable".to_owned())
 }
 
 #[tauri::command]
@@ -654,6 +699,12 @@ pub fn show_utility_window(app: AppHandle, label: String) -> Result<(), String> 
         return Err("unsupported utility window".to_owned());
     }
     if label == "timer" {
+        if app
+            .get_webview_window("gamcha-notice")
+            .is_some_and(|notice| notice.is_visible().unwrap_or(false))
+        {
+            return Ok(());
+        }
         place_timer_bubble(&app)?;
     } else if label == "gamcha" {
         prepare_gamcha_overlay(&app)?;
@@ -661,6 +712,9 @@ pub fn show_utility_window(app: AppHandle, label: String) -> Result<(), String> 
             let _ = notice.hide();
         }
     } else if label == "gamcha-notice" {
+        if let Some(timer) = app.get_webview_window("timer") {
+            let _ = timer.hide();
+        }
         place_gamcha_notice_bubble(&app)?;
     }
     let window = app
@@ -698,4 +752,13 @@ pub fn hide_utility_window(app: AppHandle, label: String) -> Result<(), String> 
 #[tauri::command]
 pub fn quit_application(app: AppHandle) {
     app.exit(0);
+}
+#[cfg(test)]
+mod gamcha_notice_position_tests {
+    use super::gamcha_notice_desired_y;
+
+    #[test]
+    fn anchors_the_reward_notice_at_the_same_pet_offset_as_the_timer() {
+        assert_eq!(gamcha_notice_desired_y(700, 82), 630);
+    }
 }

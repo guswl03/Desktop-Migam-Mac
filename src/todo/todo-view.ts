@@ -1,6 +1,7 @@
 import { invoke } from "@tauri-apps/api/core";
 import { listen } from "@tauri-apps/api/event";
 import { invokeWhenReady } from "../tauri/invoke-when-ready";
+import type { TimerState } from "../timer/timer-view";
 
 interface TodoItem { id: string; text: string; createdAt: string; completedAt: string | null; }
 interface FocusTodoLink { todoId: string; titleAtStart: string; }
@@ -40,12 +41,14 @@ export async function mountTodo(container: HTMLElement): Promise<() => void> {
   const resultTitle = container.querySelector<HTMLElement>("#todo-focus-result-title")!;
   const celebration = container.querySelector<HTMLElement>("#todo-celebration")!;
   const status = container.querySelector<HTMLElement>("#todo-status")!;
+  const focusButton = container.querySelector<HTMLButtonElement>("#todo-start-focus")!;
   let state: TodoSnapshot = { schemaVersion: 1, items: [], selectedTodoId: null, allCompletedCelebrated: false, activeFocusTodo: null, pendingFocusTodo: null };
   let completedHidden = false;
   let itemOrder: string[] = [];
   let deferSort = false;
   let sortTimer: number | undefined;
   let busy = false;
+  let timerState: TimerState = { phase: "stopped", remainingSeconds: 0, completedFocusSessions: 0 };
 
   const orderedIds = (): string[] => [...state.items.filter((item) => !item.completedAt), ...state.items.filter((item) => item.completedAt)].map((item) => item.id);
   const render = (): void => {
@@ -54,7 +57,7 @@ export async function mountTodo(container: HTMLElement): Promise<() => void> {
     for (const item of state.items) if (!itemOrder.includes(item.id)) itemOrder.push(item.id);
     if (!deferSort) itemOrder = orderedIds();
     const done = state.items.filter((item) => item.completedAt).length;
-    summary.textContent = `${done} / ${state.items.length}`;
+    summary.textContent = `완료 ${done} / 전체 ${state.items.length}`;
     const selected = state.items.find((item) => item.id === state.selectedTodoId);
     current.textContent = state.activeFocusTodo?.titleAtStart ?? selected?.text ?? "선택된 할 일 없음";
     toggle.textContent = completedHidden ? "완료 보기" : "완료 숨기기";
@@ -78,6 +81,7 @@ export async function mountTodo(container: HTMLElement): Promise<() => void> {
     if (state.items.length === 0) list.innerHTML = `<div class="todo-app-empty"><b>오늘 할 일을 하나 적어보자!</b><span>작게 시작해도 충분해요.</span></div>`;
     result.hidden = !state.pendingFocusTodo;
     resultTitle.textContent = state.pendingFocusTodo?.titleAtStart ?? "";
+    focusButton.textContent = timerState.phase === "stopped" ? "집중 시작" : timerState.phase === "paused" ? "다시 시작" : "일시정지";
   };
 
   const apply = (snapshot: TodoSnapshot): void => { state = snapshot; render(); };
@@ -107,10 +111,17 @@ export async function mountTodo(container: HTMLElement): Promise<() => void> {
     void run("set_todo_completed", { id: row.dataset.todoId, completed: check.checked });
   });
   result.addEventListener("click", (event) => { const button = (event.target as Element).closest<HTMLButtonElement>("[data-focus-action]"); if (button) void run("resolve_focus_todo", { action: button.dataset.focusAction }); });
-  container.querySelector("#todo-start-focus")?.addEventListener("click", async () => { await invoke("start_focus"); await invoke("show_utility_window", { label: "timer" }); });
+  focusButton.addEventListener("click", async () => {
+    const command = timerState.phase === "stopped" ? "start_focus" : timerState.phase === "paused" ? "resume_timer" : "pause_timer";
+    timerState = await invoke<TimerState>(command);
+    render();
+    await invoke("show_utility_window", { label: "timer" });
+  });
   container.querySelector("#todo-show-timer")?.addEventListener("click", () => void invoke("show_utility_window", { label: "timer" }));
+  try { timerState = await invokeWhenReady<TimerState>("get_timer_state"); render(); } catch { /* timer UI remains usable after backend reconnect */ }
+  const unlistenTimer = await listen<TimerState>("timer://state", ({ payload }) => { timerState = payload; render(); });
   const unlistenChanged = await listen<TodoSnapshot>("todo://changed", ({ payload }) => apply(payload));
   const unlistenCompleted = await listen<TodoSnapshot>("todo://all-completed", ({ payload }) => { apply(payload); celebration.hidden = false; window.setTimeout(() => { celebration.hidden = true; }, 4500); });
   input.focus();
-  return () => { window.clearTimeout(sortTimer); unlistenChanged(); unlistenCompleted(); };
+  return () => { window.clearTimeout(sortTimer); unlistenTimer(); unlistenChanged(); unlistenCompleted(); };
 }

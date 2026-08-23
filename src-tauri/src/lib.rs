@@ -165,6 +165,7 @@ pub fn run() {
             presentation::commands::position_timer_bubble,
             presentation::commands::position_gamcha_bubble,
             presentation::commands::show_pet_context_menu,
+            presentation::commands::toggle_timer_bubble,
             presentation::commands::show_utility_window,
             presentation::commands::hide_utility_window,
             presentation::commands::quit_application

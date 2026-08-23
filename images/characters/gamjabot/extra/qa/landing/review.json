@@ -1,6 +1,6 @@
 {
   "ok": true,
-  "frames_root": "C:\\Users\\rkddl\\desktop-pet-mvp\\images\\characters\\gamjabot\\extra\\processing\\landing\\frames",
+  "frames_root": "images/characters/gamjabot/extra/processing/landing/frames",
   "states": [
     "waving"
   ],
@@ -18,7 +18,7 @@
       "frames": [
         {
           "index": 0,
-          "file": "C:\\Users\\rkddl\\desktop-pet-mvp\\images\\characters\\gamjabot\\extra\\processing\\landing\\frames\\waving\\00.png",
+          "file": "images/characters/gamjabot/extra/processing/landing/frames/waving/00.png",
           "width": 192,
           "height": 208,
           "nontransparent_pixels": 16145,
@@ -33,7 +33,7 @@
         },
         {
           "index": 1,
-          "file": "C:\\Users\\rkddl\\desktop-pet-mvp\\images\\characters\\gamjabot\\extra\\processing\\landing\\frames\\waving\\01.png",
+          "file": "images/characters/gamjabot/extra/processing/landing/frames/waving/01.png",
           "width": 192,
           "height": 208,
           "nontransparent_pixels": 23179,
@@ -48,7 +48,7 @@
         },
         {
           "index": 2,
-          "file": "C:\\Users\\rkddl\\desktop-pet-mvp\\images\\characters\\gamjabot\\extra\\processing\\landing\\frames\\waving\\02.png",
+          "file": "images/characters/gamjabot/extra/processing/landing/frames/waving/02.png",
           "width": 192,
           "height": 208,
           "nontransparent_pixels": 17533,
@@ -63,7 +63,7 @@
         },
         {
           "index": 3,
-          "file": "C:\\Users\\rkddl\\desktop-pet-mvp\\images\\characters\\gamjabot\\extra\\processing\\landing\\frames\\waving\\03.png",
+          "file": "images/characters/gamjabot/extra/processing/landing/frames/waving/03.png",
           "width": 192,
           "height": 208,
           "nontransparent_pixels": 16273,

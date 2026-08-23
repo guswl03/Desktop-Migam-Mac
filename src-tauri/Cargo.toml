@@ -6,7 +6,7 @@ authors = ["migam desktop contributors"]
 edition = "2021"
 
 [lib]
-name = "desktop_pet_mvp_lib"
+name = "migam_desktop_lib"
 crate-type = ["lib", "cdylib", "staticlib"]
 
 [build-dependencies]

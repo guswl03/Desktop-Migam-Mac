@@ -1,5 +1,6 @@
 import { invoke } from "@tauri-apps/api/core";
 import { listen } from "@tauri-apps/api/event";
+import { calculatePhotoDeliveryLayout, photoDeliveryDelayMilliseconds } from "./photo-delivery-motion";
 import pullStripUrl from "../../images/characters/gamjabot/extra/photo-delivery/gamjabot-pull-strip.png";
 import hyperVPhotoUrl from "../../images/characters/gamjabot/extra/photo-delivery/photos/hyper-v.png";
 import notepadPhotoUrl from "../../images/characters/gamjabot/extra/photo-delivery/photos/notepad.png";
@@ -7,9 +8,7 @@ import visualStudioPhotoUrl from "../../images/characters/gamjabot/extra/photo-d
 import windbgPhotoUrl from "../../images/characters/gamjabot/extra/photo-delivery/photos/windbg.png";
 
 const PULL_DURATION_MILLISECONDS = 18_000;
-const PET_LEAVE_DURATION_MILLISECONDS = 3_500;
-const FIRST_DELIVERY_MINIMUM_MILLISECONDS = 120_000;
-const DELIVERY_DELAY_RANGE_MILLISECONDS = 120_000;
+const PET_LEAVE_DURATION_MILLISECONDS = 1_500;
 
 const photoUrls = [
   visualStudioPhotoUrl,
@@ -90,11 +89,10 @@ export function startPhotoDeliveryScheduler(): () => void {
   let active = true;
   let timeout = 0;
   const schedule = (): void => {
-    const delay =
-      FIRST_DELIVERY_MINIMUM_MILLISECONDS + Math.random() * DELIVERY_DELAY_RANGE_MILLISECONDS;
+    const delay = photoDeliveryDelayMilliseconds(Math.random());
     timeout = window.setTimeout(() => {
       if (!active) return;
-      void invoke<boolean>("start_photo_delivery").finally(schedule);
+      void invoke<boolean>("start_photo_delivery", { automatic: true }).finally(schedule);
     }, delay);
   };
   schedule();
@@ -181,16 +179,14 @@ export async function mountPhotoDelivery(container: HTMLElement): Promise<() => 
       const scale = Math.min(maximumWidth / photo.naturalWidth, maximumHeight / photo.naturalHeight);
       const photoWidth = Math.max(300, Math.round(photo.naturalWidth * scale));
       const photoHeight = Math.max(240, Math.round(photo.naturalHeight * scale));
-      const margin = 32;
-      const sideInset = Math.min(90, Math.max(0, (window.innerWidth - photoWidth - margin * 2) * 0.12));
       const comesFromLeft = Math.random() < 0.5;
-      const targetPhotoX = comesFromLeft
-        ? margin + Math.random() * sideInset
-        : window.innerWidth - photoWidth - margin - Math.random() * sideInset;
-      const targetPhotoY = margin + Math.random() * Math.max(0, window.innerHeight - photoHeight - margin * 2);
-      const targetX = comesFromLeft ? targetPhotoX : targetPhotoX - 123;
-      const targetY = targetPhotoY + photoHeight - 200;
-      const startX = comesFromLeft ? -(photoWidth + 183) : window.innerWidth + 60;
+      const { targetX, y: targetY, startX } = calculatePhotoDeliveryLayout(
+        window.innerWidth,
+        window.innerHeight,
+        photoWidth,
+        photoHeight,
+        comesFromLeft,
+      );
 
       rig.style.setProperty("--photo-width", `${photoWidth}px`);
       rig.style.setProperty("--photo-height", `${photoHeight}px`);

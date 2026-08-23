@@ -1,5 +1,5 @@
 import { invoke } from "@tauri-apps/api/core";
-import { listen } from "@tauri-apps/api/event";
+import { emit, listen } from "@tauri-apps/api/event";
 import {
   availableMonitors,
   currentMonitor,
@@ -16,6 +16,7 @@ import {
   clampPosition,
   getPositionBounds,
   getVisiblePositionBounds,
+  isPetMotionLocked,
   pickHorizontalTarget,
   type Point,
   type PositionBounds,
@@ -166,6 +167,10 @@ export function startPetMotion(sprite: PetSprite): () => void {
     sprite.setAnimation(animation);
   };
 
+  const setDragBubbleVisibility = (dragging: boolean): void => {
+    void emit("pet://drag-state", { dragging });
+  };
+
   const beginDrag = async (event: PointerEvent): Promise<void> => {
     if (event.button !== 0 || timerActive) return;
     event.preventDefault();
@@ -181,6 +186,7 @@ export function startPetMotion(sprite: PetSprite): () => void {
       samples: [],
     };
     setMode(draggedMode, "dragged");
+    setDragBubbleVisibility(true);
 
     const [cursor, windowPosition] = await Promise.all([
       cursorPosition(),
@@ -196,6 +202,7 @@ export function startPetMotion(sprite: PetSprite): () => void {
   const finishDrag = async (event: PointerEvent): Promise<void> => {
     if (mode.kind !== "dragged" || event.pointerId !== mode.pointerId) return;
     event.preventDefault();
+    setDragBubbleVisibility(false);
     if (sprite.element.hasPointerCapture(event.pointerId)) {
       sprite.element.releasePointerCapture(event.pointerId);
     }
@@ -407,6 +414,7 @@ export function startPetMotion(sprite: PetSprite): () => void {
   const cancelDrag = (event: PointerEvent): void => {
     if (mode.kind === "dragged" && event.pointerId === mode.pointerId) {
       interactionId += 1;
+      setDragBubbleVisibility(false);
       setMode(idleMode(), "idle");
     }
   };
@@ -416,9 +424,10 @@ export function startPetMotion(sprite: PetSprite): () => void {
   sprite.element.addEventListener("pointercancel", cancelDrag);
 
   const applyTimerState = (state: TimerSnapshot): void => {
-    const active = state.phase !== "stopped";
+    const active = isPetMotionLocked(state.phase);
     timerActive = active;
     if (active) {
+      if (mode.kind === "dragged") setDragBubbleVisibility(false);
       interactionId += 1;
       const phase = state.phase as TimerMode["phase"];
       setMode({ kind: "timer", phase }, phase === "focus" ? "focused" : "idle");
@@ -484,6 +493,7 @@ export function startPetMotion(sprite: PetSprite): () => void {
   return () => {
     active = false;
     interactionId += 1;
+    setDragBubbleVisibility(false);
     window.clearInterval(animationTimer);
     window.clearInterval(systemMetricsTimer);
     window.clearTimeout(celebrationTimer);
