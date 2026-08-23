@@ -5,6 +5,12 @@ export async function attachPetContextMenu(target: HTMLElement): Promise<() => v
   const menu = await Menu.new({
     items: [
       {
+        id: "pet-gamcha",
+        text: "GAMCHA!",
+        action: () => void invoke("show_utility_window", { label: "gamcha" }),
+      },
+      { item: "Separator" },
+      {
         id: "pet-timer",
         text: "타이머 표시",
         action: () => void invoke("show_utility_window", { label: "timer" }),

@@ -45,11 +45,29 @@ impl PomodoroService {
         event: PomodoroEvent,
         now: Instant,
     ) -> Result<(TimerState, bool), String> {
+        let (snapshot, changed, _) = self.dispatch_internal(event, now)?;
+        Ok((snapshot, changed))
+    }
+
+    pub fn tick(&self, now: Instant) -> Result<(TimerState, bool, bool), String> {
+        self.dispatch_internal(PomodoroEvent::Tick, now)
+    }
+
+    fn dispatch_internal(
+        &self,
+        event: PomodoroEvent,
+        now: Instant,
+    ) -> Result<(TimerState, bool, bool), String> {
         let mut machine = self
             .machine
             .lock()
             .map_err(|_| "timer state is unavailable".to_owned())?;
+        let previous_phase = machine.phase();
+        let previous_completed = machine.completed_focus_sessions();
         let changed = !machine.reduce(event, now).is_empty();
+        let focus_completed_naturally = event == PomodoroEvent::Tick
+            && previous_phase == PomodoroPhase::Focus
+            && machine.completed_focus_sessions() > previous_completed;
         let configuration = *self
             .configuration
             .lock()
@@ -65,6 +83,7 @@ impl PomodoroService {
         Ok((
             Self::snapshot(&machine, now, configuration.focus_duration),
             changed,
+            focus_completed_naturally,
         ))
     }
 
@@ -171,5 +190,30 @@ mod tests {
         assert_eq!(stopped.remaining_seconds, 10 * 60);
         let (started, _) = service.dispatch(PomodoroEvent::Start, now).unwrap();
         assert_eq!(started.remaining_seconds, 10 * 60);
+    }
+
+    #[test]
+    fn elapsed_focus_reports_a_natural_completion() {
+        let service = PomodoroService::new(&settings());
+        let now = Instant::now();
+        service.dispatch(PomodoroEvent::Start, now).unwrap();
+
+        let (state, changed, completed) = service.tick(now + Duration::from_secs(25 * 60)).unwrap();
+
+        assert!(changed);
+        assert!(completed);
+        assert_eq!(state.completed_focus_sessions, 1);
+    }
+
+    #[test]
+    fn skipped_focus_is_not_a_natural_completion() {
+        let service = PomodoroService::new(&settings());
+        let now = Instant::now();
+        service.dispatch(PomodoroEvent::Start, now).unwrap();
+
+        let (_, changed, completed) = service.dispatch_internal(PomodoroEvent::Skip, now).unwrap();
+
+        assert!(changed);
+        assert!(!completed);
     }
 }

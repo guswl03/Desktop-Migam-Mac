@@ -15,6 +15,8 @@ import thrown02 from "../../images/characters/gamjabot/extra/frames/thrown/02.pn
 import thrown03 from "../../images/characters/gamjabot/extra/frames/thrown/03.png";
 import thrown04 from "../../images/characters/gamjabot/extra/frames/thrown/04.png";
 import thrown05 from "../../images/characters/gamjabot/extra/frames/thrown/05.png";
+import type { CostumeSlot } from "../costumes/catalog";
+import type { CostumeAlignment } from "../costumes/alignment";
 
 export type PetAnimation =
   | "idle"
@@ -51,6 +53,7 @@ const animations: Record<PetAnimation, AnimationDefinition> = {
 export interface PetSprite {
   element: HTMLDivElement;
   setAnimation(animation: PetAnimation): void;
+  setCostume(costume: { url: string; slot: CostumeSlot; alignment: CostumeAlignment } | null): void;
   advanceFrame(): void;
 }
 
@@ -61,6 +64,12 @@ export function createPetSprite(): PetSprite {
   element.setAttribute("aria-label", "감자봇 데스크톱 펫");
   element.style.backgroundImage = `url("${gamjabotAtlas}")`;
   element.style.backgroundSize = `${DISPLAY_ATLAS_WIDTH}px ${DISPLAY_ATLAS_HEIGHT}px`;
+  const costume = document.createElement("img");
+  costume.className = "pet-costume";
+  costume.alt = "";
+  costume.hidden = true;
+  costume.draggable = false;
+  element.append(costume);
 
   let animation: PetAnimation = "idle";
   let frame = 0;
@@ -89,6 +98,22 @@ export function createPetSprite(): PetSprite {
         animation = nextAnimation;
         frame = 0;
         render();
+      }
+    },
+    setCostume(nextCostume) {
+      costume.hidden = !nextCostume;
+      if (nextCostume) {
+        costume.src = nextCostume.url;
+        costume.dataset.slot = nextCostume.slot;
+        costume.style.setProperty("--costume-x", `${nextCostume.alignment.x}px`);
+        costume.style.setProperty("--costume-y", `${nextCostume.alignment.y}px`);
+        costume.style.setProperty("--costume-size", `${nextCostume.alignment.size}px`);
+      } else {
+        costume.removeAttribute("src");
+        delete costume.dataset.slot;
+        costume.style.removeProperty("--costume-x");
+        costume.style.removeProperty("--costume-y");
+        costume.style.removeProperty("--costume-size");
       }
     },
     advanceFrame() {

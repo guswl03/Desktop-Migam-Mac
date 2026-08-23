@@ -59,6 +59,32 @@
         "height": 620,
         "visible": false,
         "resizable": true
+      },
+      {
+        "label": "gamcha-notice",
+        "title": "GAMCHA Reward",
+        "width": 196,
+        "height": 82,
+        "visible": false,
+        "decorations": false,
+        "transparent": true,
+        "alwaysOnTop": true,
+        "skipTaskbar": true,
+        "shadow": false,
+        "resizable": false
+      },
+      {
+        "label": "gamcha",
+        "title": "GAMCHA!",
+        "width": 380,
+        "height": 360,
+        "visible": false,
+        "decorations": false,
+        "transparent": true,
+        "alwaysOnTop": true,
+        "skipTaskbar": true,
+        "shadow": false,
+        "resizable": false
       }
     ],
     "security": {

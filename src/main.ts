@@ -8,6 +8,9 @@ import type {
   Settings,
 } from "./contracts";
 import { mountKick } from "./intervention/kick-view";
+import { mountGamcha, mountGamchaNotice } from "./gamcha/gamcha-view";
+import { costumeById } from "./costumes/catalog";
+import { resolveCostumeAlignment, type CostumeAlignment } from "./costumes/alignment";
 import { attachPetContextMenu } from "./pet/context-menu";
 import { startPetMotion } from "./pet/tauri-motion-runtime";
 import { createPetSprite } from "./pet/sprite";
@@ -32,6 +35,26 @@ function renderPet(): void {
   app!.replaceChildren(shell);
 
   if (windowLabel === "pet") {
+    type CostumeSnapshot = {
+      equippedCostumeId: string | null;
+      costumeAlignments: Record<string, CostumeAlignment>;
+    };
+    const applyCostume = (snapshot: CostumeSnapshot): void => {
+      const costume = snapshot.equippedCostumeId
+        ? (costumeById.get(snapshot.equippedCostumeId) ?? null)
+        : null;
+      sprite.setCostume(costume ? {
+        url: costume.url,
+        slot: costume.slot,
+        alignment: resolveCostumeAlignment(costume.slot, snapshot.costumeAlignments[costume.id]),
+      } : null);
+    };
+    void invoke<CostumeSnapshot>("get_gamcha_state")
+      .then(applyCostume)
+      .catch(() => sprite.setCostume(null));
+    void listen<CostumeSnapshot>("gamcha://equipped", ({ payload }) =>
+      applyCostume(payload),
+    ).then((unlisten) => window.addEventListener("pagehide", unlisten, { once: true }));
     const stopMotion = startPetMotion(sprite);
     window.addEventListener("pagehide", stopMotion, { once: true });
     void attachPetContextMenu(sprite.element).then((cleanup) => {
@@ -46,7 +69,7 @@ function renderTimer(): void {
       window.addEventListener("pagehide", cleanup, { once: true });
     })
     .catch(() => {
-      app!.innerHTML = `<main class="panel"><h1>타이머를 불러오지 못했습니다.</h1><p class="muted">앱을 다시 시작해 주세요.</p></main>`;
+      app!.innerHTML = `<main class="timer-panel"><section class="timer-bubble"><div class="timer-readout"><p class="timer-phase">재연결</p><p class="timer-remaining">--:--</p></div><span class="timer-error">앱을 다시 시작해 주세요.</span></section></main>`;
     });
 }
 
@@ -54,6 +77,20 @@ function renderKick(): void {
   void mountKick(app!).then((cleanup) => {
     window.addEventListener("pagehide", cleanup, { once: true });
   });
+}
+
+function renderGamcha(): void {
+  void mountGamcha(app!)
+    .then((cleanup) => window.addEventListener("pagehide", cleanup, { once: true }))
+    .catch(() => {
+      app!.innerHTML = `<main class="gamcha-panel"><section class="gamcha-bubble"><p class="gamcha-error">GAMCHA를 불러오지 못했습니다.</p></section></main>`;
+    });
+}
+
+function renderGamchaNotice(): void {
+  void mountGamchaNotice(app!)
+    .then((cleanup) => window.addEventListener("pagehide", cleanup, { once: true }))
+    .catch(() => undefined);
 }
 
 function numberValue(form: FormData, name: string): number {
@@ -243,6 +280,14 @@ async function start(): Promise<void> {
   }
   if (windowLabel === "timer") {
     renderTimer();
+    return;
+  }
+  if (windowLabel === "gamcha") {
+    renderGamcha();
+    return;
+  }
+  if (windowLabel === "gamcha-notice") {
+    renderGamchaNotice();
     return;
   }
   try {

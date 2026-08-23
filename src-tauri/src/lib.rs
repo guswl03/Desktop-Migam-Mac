@@ -5,7 +5,10 @@ pub mod infrastructure;
 pub mod presentation;
 
 use app_state::AppState;
-use application::{foreground_monitor::ForegroundEffect, settings_service::SettingsService};
+use application::{
+    foreground_monitor::ForegroundEffect, gamcha_service::GamchaService,
+    settings_service::SettingsService,
+};
 use domain::pomodoro::PomodoroPhase;
 use tauri::{Emitter, Manager};
 #[cfg(windows)]
@@ -19,24 +22,21 @@ fn emergency_shortcut() -> Shortcut {
 pub fn run() {
     tauri::Builder::default()
         .setup(|app| {
-            let settings_service = SettingsService::new(app.path().app_data_dir()?);
+            let app_data_dir = app.path().app_data_dir()?;
+            let settings_service = SettingsService::new(app_data_dir.clone());
             let settings = settings_service.load_or_default();
-            app.manage(AppState::new(settings, settings_service));
+            let gamcha_service = GamchaService::new(app_data_dir);
+            app.manage(AppState::new(settings, settings_service, gamcha_service));
             let timer_app = app.handle().clone();
             let _ = std::thread::Builder::new()
                 .name("pomodoro-ticker".to_owned())
                 .spawn(move || loop {
                     std::thread::sleep(std::time::Duration::from_millis(250));
                     let state = timer_app.state::<AppState>();
-                    let Ok((snapshot, changed)) = state.pomodoro_service.dispatch(
-                        domain::pomodoro::PomodoroEvent::Tick,
-                        std::time::Instant::now(),
-                    ) else {
-                        break;
+                    let Ok(snapshot) = presentation::commands::tick_timer(&timer_app, &state)
+                    else {
+                        continue;
                     };
-                    if changed {
-                        let _ = timer_app.emit("timer://state", &snapshot);
-                    }
                     let focus_settings = state
                         .settings
                         .read()
@@ -118,6 +118,10 @@ pub fn run() {
             presentation::commands::save_settings,
             presentation::commands::get_timer_state,
             presentation::commands::get_detection_state,
+            presentation::commands::get_gamcha_state,
+            presentation::commands::draw_gamcha,
+            presentation::commands::equip_gamcha_costume,
+            presentation::commands::set_gamcha_costume_alignment,
             presentation::commands::complete_intervention,
             presentation::commands::cancel_intervention,
             presentation::commands::start_focus,
@@ -128,6 +132,7 @@ pub fn run() {
             presentation::commands::emergency_stop,
             presentation::commands::resume_pet,
             presentation::commands::position_timer_bubble,
+            presentation::commands::position_gamcha_bubble,
             presentation::commands::show_utility_window,
             presentation::commands::hide_utility_window,
             presentation::commands::quit_application

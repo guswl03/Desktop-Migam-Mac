@@ -573,6 +573,7 @@ dependencies = [
 name = "desktop-pet-mvp"
 version = "0.1.0"
 dependencies = [
+ "getrandom 0.3.4",
  "serde",
  "serde_json",
  "tauri",

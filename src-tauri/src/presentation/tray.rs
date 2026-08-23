@@ -7,6 +7,7 @@ use tauri::{
 pub fn build(app: &App) -> tauri::Result<()> {
     let show_pet = MenuItem::with_id(app, "show_pet", "펫 표시", true, None::<&str>)?;
     let show_timer = MenuItem::with_id(app, "show_timer", "타이머 표시", true, None::<&str>)?;
+    let show_gamcha = MenuItem::with_id(app, "show_gamcha", "GAMCHA!", true, None::<&str>)?;
     let start_focus = MenuItem::with_id(app, "start_focus", "집중 시작", true, None::<&str>)?;
     let pause_timer = MenuItem::with_id(app, "pause_timer", "일시정지", true, None::<&str>)?;
     let resume_timer = MenuItem::with_id(app, "resume_timer", "재개", true, None::<&str>)?;
@@ -20,6 +21,7 @@ pub fn build(app: &App) -> tauri::Result<()> {
         &[
             &show_pet,
             &show_timer,
+            &show_gamcha,
             &start_focus,
             &pause_timer,
             &resume_timer,
@@ -40,6 +42,12 @@ pub fn build(app: &App) -> tauri::Result<()> {
                 let _ = crate::presentation::commands::show_utility_window(
                     app.clone(),
                     "timer".to_owned(),
+                );
+            }
+            "show_gamcha" => {
+                let _ = crate::presentation::commands::show_utility_window(
+                    app.clone(),
+                    "gamcha".to_owned(),
                 );
             }
             "show_settings" => {

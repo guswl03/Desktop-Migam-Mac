@@ -89,7 +89,16 @@ export async function mountTimer(container: HTMLElement): Promise<() => void> {
     }
   };
 
-  let currentState = await invoke<TimerState>("get_timer_state");
+  let currentState: TimerState = {
+    phase: "stopped",
+    remainingSeconds: 0,
+    completedFocusSessions: 0,
+  };
+  try {
+    currentState = await invoke<TimerState>("get_timer_state");
+  } catch {
+    if (error) error.textContent = "타이머 재연결 중";
+  }
   render(currentState);
 
   const runCommand = async (command: string): Promise<void> => {
@@ -112,14 +121,21 @@ export async function mountTimer(container: HTMLElement): Promise<() => void> {
     button.addEventListener("click", () => void runCommand(button.dataset.command ?? ""));
   }
 
-  const unlisten = await listen<TimerState>("timer://state", ({ payload }) => {
-    currentState = payload;
-    render(currentState);
-  });
+  let unlisten = (): void => undefined;
+  try {
+    unlisten = await listen<TimerState>("timer://state", ({ payload }) => {
+      currentState = payload;
+      if (error) error.textContent = "";
+      render(currentState);
+    });
+  } catch {
+    if (error) error.textContent = "타이머 재연결 중";
+  }
   const pollTimer = window.setInterval(async () => {
     if (disposed || requestInFlight) return;
     try {
       currentState = await invoke<TimerState>("get_timer_state");
+      if (error) error.textContent = "";
       render(currentState);
     } catch {
       if (error) error.textContent = "타이머 상태를 불러오지 못했습니다.";

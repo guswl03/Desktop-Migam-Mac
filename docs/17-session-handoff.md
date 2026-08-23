@@ -6,12 +6,26 @@
 
 ## 현재 목표
 
-작업 7 `안전한 개입`의 비행 발차기·최소화 Windows 수동 게이트를 통과하고 남은 취소 경로를 보강한다.
+작업 9 `GAMCHA`의 집중 완료 보상·룰렛 Windows 수동 게이트를 통과하고 당첨 코스튬 착용 정렬을 구현한다.
 
 ## 현재 상태
 
 - Tauri 2 + Rust + Vite + 순수 TypeScript 기반 구축이 완료되어 있다.
-- `pet`, `card`, `timer`, `settings` 창과 트레이, 설정 저장·복구, 전역 긴급 중지가 구현되어 있다.
+- `pet`, `card`, `timer`, `settings`, `gamcha` 창과 트레이, 설정 저장·복구, 전역 긴급 중지가 구현되어 있다.
+- 집중 시간이 자연스럽게 끝날 때만 GAMCHA 티켓 1장이 지급된다. Skip과 Stop은 보상하지 않는다.
+- GAMCHA 티켓·누적 추첨·보유 코스튬은 앱 데이터 디렉터리의 `gamcha.json`에 저장되고 손상 파일은 별도로 보존한다.
+- `pack/manifest.json` 159종 중 `default` 3종을 제외한 156종이 실제 추첨 후보이다.
+- 확률은 Common 60%, Rare 25%, Epic 10%, Legendary 4%, Special 1%이다.
+- 선택된 등급 안에서는 그 등급의 모든 코스튬을 모을 때까지 중복이 나오지 않는다.
+- 자연 집중 완료 시에는 작은 `gamcha-notice` 보상 말풍선만 펫 위에 나타난다.
+- 보상 말풍선을 클릭하면 펫이 위치한 모니터 크기의 투명 `gamcha` 오버레이가 열리며, 기존 바탕 화면과 앱 창은 그대로 보인다.
+- 추첨은 32개 실제 코스튬이 모니터의 위·오른쪽·아래·왼쪽 네 변을 따라 약 0.9초마다 양방향 회전하고, 결과 카드는 화면 정중앙에 표시된다. 56개 색종이, 중앙 24프레임 감속 셔플과 등급별 공개 효과도 유지한다.
+- 중앙 결과는 사각 프레임 없이 경계가 사라지는 원형 등급 광원 위에 아이템·이름만 표시한다. 뽑기 버튼은 작은 반투명 단색 버튼과 상단 3px 무지개 선을 사용한다.
+- 타이머 UI polling과 백그라운드 ticker 중 어느 쪽이 먼저 자연 완료를 처리해도 공통 Tick 경로에서 티켓을 지급한다.
+- GAMCHA 왼쪽 아래 `OUTFIT` 옷장에서 보유 코스튬 또는 `기본 모습`을 선택해 착용·해제할 수 있다.
+- 착용 ID는 `gamcha.json`에 저장되고 `gamcha://equipped` 이벤트로 펫에 즉시 반영되며 재시작 후 복원된다. 보유하지 않은 ID는 Rust에서 거부한다.
+- 256×256 코스튬은 128×128로 표시하고 96×104 펫 셀에 `left -16px`, `top -12px`로 중심 정렬한다. 걷기 중 2px 바운스를 적용하고 Hard Impact에서는 숨긴다.
+- `pack`의 개별 자산별 runtime alignment 메타데이터는 아직 없으므로 모자·안경·몸 장식별 Windows 육안 확인 후 종류별 미세 보정이 다음 단계다.
 - 보라색 placeholder 대신 `images/characters/gamjabot/final/spritesheet-extended.webp`의 실제 감자봇을 표시한다.
 - 감자봇 atlas는 1536×2288, 192×208 셀, 8열×11행이며 deterministic validation과 chroma despill이 통과했다.
 - 펫 창은 128×128이며, HTML/root/body/app/shell 배경을 모두 투명하게 두어 감자봇 외 픽셀을 그리지 않는다.
@@ -64,6 +78,14 @@
 
 ## 이번 세션 변경 파일
 
+- `src/gamcha/gamcha-model.ts`
+- `src/gamcha/gamcha-model.test.ts`
+- `src/gamcha/gamcha-view.ts`
+- `src-tauri/src/domain/gamcha.rs`
+- `src-tauri/src/application/gamcha_service.rs`
+- `src-tauri/src/presentation/tray.rs`
+- `src-tauri/capabilities/default.json`
+
 - `src/contracts.ts`
 - `src/main.ts`
 - `src/intervention/kick-view.ts`
@@ -102,6 +124,22 @@
 - `images/characters/gamjabot/extra/qa/previews/*.gif`
 
 ## 검증 상태
+
+- GAMCHA 구현 후 `npm test`: 프런트 18개 테스트 통과.
+- GAMCHA 구현 후 `cargo test`: Rust 32개 테스트 통과.
+- `cargo fmt`, `cargo clippy --all-targets -- -D warnings`: 통과.
+- `npm run tauri -- build --no-bundle`: 통과, release 실행 파일 생성.
+- 일반 사용자 Windows에서 자연 완료 보상, 말풍선 위치, 등급별 연출과 재시작 복원은 수동 확인이 필요하다.
+- 사용자 확인에서 발견된 `휴식 전환 후 TICKET 0` 경쟁 조건과 추첨 전 깨진 빈 이미지는 수정했고 전체 검사를 재통과했다.
+- 타이머 초기 연결 실패 시 `타이머를 불러오지 못했습니다`가 작은 말풍선에서 크게 잘리던 UI를 제거했다. 이제 `재연결 --:--` 상태에서 500ms polling으로 자동 복구한다.
+- GAMCHA 2단계 전체화면 변경 후 프런트 18개·Rust 32개·Clippy와 release build를 재통과했다.
+- 코스튬 착용 구현 후 프런트 18개·Rust 33개, Clippy와 release build를 통과했다.
+- 코스튬을 이름 기준 `head`·`face`·`neck`·`body`·`full` 슬롯으로 분류하고 슬롯별 크기와 기준점을 적용했다. 사용자에게 보인 `rare_025` 연금술사 보석모는 머리 위에 작게 정렬된다.
+- 백그라운드 Tick이 일시적으로 실패해도 스레드를 종료하지 않고 다음 주기에 복구한다. Tick 상태 이벤트 전달도 best-effort로 바꿔 집중 중 전경 감시와 Kick이 함께 영구 중단되는 경로를 제거했다.
+- 위 수정 후 `npm test` 프런트 18개, TypeScript 검사, 별도 임시 경로 Vite production build, `cargo fmt --check`, Rust 33개 테스트를 통과했다. 실행 중 앱이 기본 `dist`와 `target`을 잠근 상태라 검증 출력만 임시 경로를 사용했다.
+- GAMCHA 옷장에 코스튬별 X(-80~80), Y(-80~80), 크기(48~180) 슬라이더와 `위치 초기화`를 추가했다. 선택한 코스튬을 먼저 적용한 뒤 조절하면 펫에 약 120ms 단위로 반영되고 `gamcha.json`에 코스튬 ID별로 저장된다.
+- 저장되지 않은 코스튬은 기존 슬롯 기본값을 사용하며, 과거 `gamcha.json`은 새 `costumeAlignments` 필드가 없어도 자동으로 빈 값으로 읽는다.
+- 개별 보정 기반 구현 후 프런트 20개, Rust 34개 테스트, TypeScript, Vite production build와 Clippy `-D warnings`를 통과했다.
 
 - 감자봇 `final/validation-extended.json`: `ok: true`, 1536×2288, 8×11, 오류·경고 없음.
 - 감자봇 `qa/chroma-despill-extended.json`: `ok: true`.
@@ -155,14 +193,11 @@
 
 ## 다음 작업
 
-1. dev 앱을 완전히 재시작하고 테스트 규칙의 grace를 5초로 저장한다.
-2. 집중을 시작하고 최대화하지 않은 대상 창을 5초 이상 전경에 유지한다.
-3. 네모 캐릭터가 화면 왼쪽 끝에서 날아와 충돌한 뒤 대상만 최소화되는지 확인한다.
-4. Kick 비행 중 Alt+Tab하고 `Ctrl+Shift+F12`도 각각 시험해 어떤 창도 잘못 최소화되지 않는지 확인한다.
-5. 전체 화면/최대화 창, 설정 창과 작업 관리자가 보호되는지 확인한다.
-6. 동일 창을 다시 열어 cooldown 동안 재개입하지 않는지 확인한다.
-7. 수동 결과를 진행판에 기록하고 위치·속도·크기를 조정한다.
-8. 펫 Dragged/Thrown 상태를 개입 서비스에 연결해 즉시 취소한 뒤 작업 7을 완료 처리한다.
+1. 실행 중인 dev 앱을 완전히 종료하고 다시 시작해 새 Rust 감시 루프를 로드한다.
+2. GAMCHA 옷장에서 `rare_025`를 적용하고 X·Y·크기 슬라이더로 머리 위치에 맞춘 뒤 재시작해 값이 유지되는지 확인한다.
+3. 집중을 시작하고 Chrome `YouTube` 규칙을 5초 이상 유지해 왼쪽 Kick 캐릭터와 창 최소화를 확인한다.
+4. 보유 중인 얼굴·목·몸·전신 아이템도 같은 방식으로 한 번씩 맞추고 `위치 초기화`를 확인한다.
+5. 위치만으로 맞지 않는 복합 세트는 자산 분리/마스킹 대상으로 ID를 기록한다.
 
 ## 작업 5 완료 게이트
 
