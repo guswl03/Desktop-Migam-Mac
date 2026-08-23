@@ -5,7 +5,7 @@
 ## 공통 지시문
 
 ```text
-빈 작업 폴더에서 Windows 11용 Tauri 2 + Rust + React 데스크톱 펫을 신규 개발한다.
+빈 작업 폴더에서 Windows 11용 Tauri 2 + Rust + 순수 TypeScript 데스크톱 펫을 신규 개발한다.
 코드, 프로젝트와 캐릭터 자산이 없으며 `docs` 폴더의 문서만 작업 기준으로 존재한다.
 
 작업 전:
@@ -31,7 +31,7 @@
 공통 지시문을 따른다.
 현재 폴더에 애플리케이션 코드가 없다는 전제로 시작해라.
 Windows, Node.js, npm, Rust/Cargo, MSVC build tools, Windows SDK, WebView2와 Git 사용 가능 여부를 확인해라.
-Tauri 2 + React + TypeScript 프로젝트를 새로 만들고 기본 앱을 dev 모드로 실행해라.
+Tauri 2 + Vite + 순수 TypeScript 프로젝트를 새로 만들고 기본 앱을 dev 모드로 실행해라.
 기본 typecheck, lint, test와 Tauri build 명령을 package scripts에 정리하고 생성 직후 기준 상태를 보고해라.
 외부 캐릭터 자산은 받지 말고 이후 CSS placeholder를 사용할 준비만 해라.
 ```

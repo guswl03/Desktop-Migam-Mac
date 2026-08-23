@@ -9,6 +9,7 @@ Windows 11용 Tauri 2 데스크톱 펫 MVP를 **코드, 프로젝트, 디자인 
 3. [05-implementation-roadmap.md](./05-implementation-roadmap.md) — 실제 작업 순서
 4. [06-ai-agent-work-orders.md](./06-ai-agent-work-orders.md) — AI에게 단계별로 줄 작업 지시
 5. [13-progress-board.md](./13-progress-board.md) — 진행 상태 기록
+6. [17-session-handoff.md](./17-session-handoff.md) — 다음 세션이 이어서 작업하기 위한 최신 인수인계
 
 ## 문서 지도
 
@@ -31,6 +32,7 @@ Windows 11용 Tauri 2 데스크톱 펫 MVP를 **코드, 프로젝트, 디자인 
 | `14-decision-log.md` | 설계 결정 기록 |
 | `15-troubleshooting.md` | 자주 막히는 문제와 대응 |
 | `16-definition-of-done.md` | 최종 완료 판정표 |
+| `17-session-handoff.md` | 최신 구현 상태, 검증 결과와 정확한 다음 작업 |
 
 ## AI 작업 규칙
 
@@ -41,6 +43,7 @@ Windows 11용 Tauri 2 데스크톱 펫 MVP를 **코드, 프로젝트, 디자인 
 - 창 최소화는 기본 꺼짐이고, 불확실한 창은 절대 조작하지 않는다.
 - 실제 창 제목, 키 입력, URL과 사용 앱 기록은 저장하거나 로그에 남기지 않는다.
 - 작업 결과와 남은 문제를 `13-progress-board.md`에 기록한다.
+- 모든 세션은 루트 `AGENTS.md`와 `17-session-handoff.md`를 먼저 읽고, 종료 전에 두 진행 문서를 갱신한다.
 
 ## 핵심 개발 경로
 

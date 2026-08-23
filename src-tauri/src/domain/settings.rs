@@ -6,6 +6,7 @@ use crate::domain::distraction::DistractionRule;
 pub const CURRENT_SCHEMA_VERSION: u32 = 2;
 
 #[derive(Clone, Debug, Deserialize, Eq, PartialEq, Serialize)]
+#[serde(rename_all = "camelCase")]
 pub struct Settings {
     pub schema_version: u32,
     pub pet: PetSettings,
@@ -14,11 +15,13 @@ pub struct Settings {
 }
 
 #[derive(Clone, Debug, Deserialize, Eq, PartialEq, Serialize)]
+#[serde(rename_all = "camelCase")]
 pub struct PetSettings {
     pub visual_scale_percent: u8,
 }
 
 #[derive(Clone, Debug, Deserialize, Eq, PartialEq, Serialize)]
+#[serde(rename_all = "camelCase")]
 pub struct PomodoroSettings {
     pub focus_minutes: u16,
     pub short_break_minutes: u16,
@@ -27,6 +30,7 @@ pub struct PomodoroSettings {
 }
 
 #[derive(Clone, Debug, Deserialize, Eq, PartialEq, Serialize)]
+#[serde(rename_all = "camelCase")]
 pub struct FocusGuardSettings {
     pub intervention_enabled: bool,
     #[serde(default)]
@@ -56,11 +60,13 @@ pub enum SettingsLoadError {
 }
 
 #[derive(Deserialize)]
+#[serde(rename_all = "camelCase")]
 struct SchemaVersion {
     schema_version: u32,
 }
 
 #[derive(Deserialize)]
+#[serde(rename_all = "camelCase")]
 struct SettingsV1 {
     pet: PetSettings,
     pomodoro: PomodoroSettingsV1,
@@ -68,6 +74,7 @@ struct SettingsV1 {
 }
 
 #[derive(Deserialize)]
+#[serde(rename_all = "camelCase")]
 struct PomodoroSettingsV1 {
     focus_minutes: u16,
     short_break_minutes: u16,
@@ -196,14 +203,14 @@ mod tests {
     fn migrates_schema_version_one_to_current_settings() {
         let migrated = Settings::from_json(
             r#"{
-                "schema_version": 1,
-                "pet": { "visual_scale_percent": 125 },
+                "schemaVersion": 1,
+                "pet": { "visualScalePercent": 125 },
                 "pomodoro": {
-                    "focus_minutes": 30,
-                    "short_break_minutes": 7,
-                    "long_break_minutes": 20
+                    "focusMinutes": 30,
+                    "shortBreakMinutes": 7,
+                    "longBreakMinutes": 20
                 },
-                "focus_guard": { "intervention_enabled": true, "rules": [] }
+                "focusGuard": { "interventionEnabled": true, "rules": [] }
             }"#,
         )
         .unwrap();

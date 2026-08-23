@@ -4,6 +4,8 @@ dist/
 src-tauri/target/
 src-tauri/gen/
 .vite/
+.npm-cache/
+.tools/
 
 # Copied build outputs and duplicate source-layout folders are not part of the new repository.
 /images/app/assets/

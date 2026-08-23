@@ -71,7 +71,7 @@
 
 - Focus가 아닌데 polling하는 task 확인
 - Idle/Walk가 60fps인지 확인
-- 위치를 React state로 매 frame 갱신하는지 확인
+- 위치를 전체 화면 상태로 매 frame 갱신하는지 확인
 - 중복 event listener와 interval 확인
 - 카드/말풍선의 숨은 animation 확인
 - tracing level과 로그 write 빈도 확인
@@ -91,3 +91,14 @@
 - 관리자 권한 차이 확인
 - release build의 capability/권한 차이 확인
 - 실제 검사를 추가하되 제목은 로그하지 않음
+
+## Tauri dev 중 Vite `EBUSY` 오류
+
+증상:
+
+- `watch '...src-tauri\\target\\...exe'` 경로와 함께 `EBUSY: resource busy or locked`가 표시된다.
+
+대응:
+
+- `vite.config.ts`의 `server.watch.ignored`에 `**/src-tauri/target/**`와 `**/.tools/**`가 있는지 확인한다.
+- 실행 중인 dev 프로세스를 종료한 뒤 `npm run tauri -- dev`를 다시 실행한다.

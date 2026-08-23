@@ -7,7 +7,7 @@
 | 데스크톱 | Tauri 2 | 기존 기준 유지, 트레이와 다중 창 지원 |
 | 백엔드 | Rust stable | 상태 머신과 Windows API를 안전하게 분리 |
 | 비동기 | Tokio | 취소 가능한 polling과 timer task |
-| UI | React + TypeScript | 설정·타이머·스프라이트 UI 구현 |
+| UI | TypeScript + DOM API | MVP 화면 규모에 맞춘 최소 의존성 UI 구현 |
 | 빌드 | Vite | 빠른 개발 반복 |
 | 직렬화 | Serde + serde_json | 설정과 command/event DTO |
 | 오류 | thiserror + anyhow | 계층별 오류와 상위 전달 |
@@ -28,11 +28,12 @@
 
 ## 프런트엔드 정책
 
-- 상태 관리는 React Context와 `useReducer`로 시작한다.
+- 화면별 TypeScript 모듈과 작은 순수 상태 함수로 시작한다.
 - 별도 라우터 없이 window label로 화면 루트를 선택한다.
-- 고빈도 위치 업데이트를 React 전역 상태로 보내지 않는다.
-- CSS Modules 또는 기능별 CSS만 사용한다.
+- 고빈도 위치 업데이트는 DOM transform으로 직접 반영한다.
+- 기능별 CSS class를 사용한다.
 - UI 라이브러리는 기존 프로젝트에 있을 때만 유지한다.
+- React는 화면 복잡도가 실제로 커지기 전에는 추가하지 않는다.
 
 ## Rust 정책
 
