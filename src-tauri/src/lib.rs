@@ -7,7 +7,7 @@ pub mod presentation;
 use app_state::AppState;
 use application::{
     foreground_monitor::ForegroundEffect, gamcha_service::GamchaService,
-    settings_service::SettingsService,
+    settings_service::SettingsService, todo_service::TodoService,
 };
 use domain::pomodoro::PomodoroPhase;
 use tauri::{Emitter, Manager};
@@ -25,8 +25,14 @@ pub fn run() {
             let app_data_dir = app.path().app_data_dir()?;
             let settings_service = SettingsService::new(app_data_dir.clone());
             let settings = settings_service.load_or_default();
-            let gamcha_service = GamchaService::new(app_data_dir);
-            app.manage(AppState::new(settings, settings_service, gamcha_service));
+            let gamcha_service = GamchaService::new(app_data_dir.clone());
+            let todo_service = TodoService::new(app_data_dir);
+            app.manage(AppState::new(
+                settings,
+                settings_service,
+                gamcha_service,
+                todo_service,
+            ));
             let timer_app = app.handle().clone();
             let _ = std::thread::Builder::new()
                 .name("pomodoro-ticker".to_owned())
@@ -134,6 +140,13 @@ pub fn run() {
             presentation::commands::get_detection_state,
             presentation::commands::get_system_metrics,
             presentation::commands::get_gamcha_state,
+            presentation::commands::get_todo_state,
+            presentation::commands::add_todo,
+            presentation::commands::update_todo,
+            presentation::commands::set_todo_completed,
+            presentation::commands::select_todo,
+            presentation::commands::delete_todo,
+            presentation::commands::resolve_focus_todo,
             presentation::commands::draw_gamcha,
             presentation::commands::equip_gamcha_costume,
             presentation::commands::set_gamcha_costume_alignment,
@@ -146,6 +159,9 @@ pub fn run() {
             presentation::commands::stop_timer,
             presentation::commands::emergency_stop,
             presentation::commands::resume_pet,
+            presentation::commands::start_photo_delivery,
+            presentation::commands::settle_photo_delivery,
+            presentation::commands::finish_photo_delivery,
             presentation::commands::position_timer_bubble,
             presentation::commands::position_gamcha_bubble,
             presentation::commands::show_pet_context_menu,

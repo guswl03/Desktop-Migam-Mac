@@ -4,6 +4,7 @@ use crate::{
     application::{
         foreground_monitor::ForegroundMonitor, gamcha_service::GamchaService,
         pomodoro_service::PomodoroService, settings_service::SettingsService,
+        todo_service::TodoService,
     },
     domain::settings::Settings,
     infrastructure::windows::{
@@ -16,6 +17,7 @@ pub struct AppState {
     pub settings_service: SettingsService,
     pub pomodoro_service: PomodoroService,
     pub gamcha_service: GamchaService,
+    pub todo_service: TodoService,
     pub foreground_monitor: ForegroundMonitor,
     pub system_metrics_monitor: SystemMetricsMonitor,
     pub emergency_stopped: AtomicBool,
@@ -28,6 +30,7 @@ impl AppState {
         settings: Settings,
         settings_service: SettingsService,
         gamcha_service: GamchaService,
+        todo_service: TodoService,
     ) -> Self {
         let pomodoro_service = PomodoroService::new(&settings.pomodoro);
         Self {
@@ -35,6 +38,7 @@ impl AppState {
             settings_service,
             pomodoro_service,
             gamcha_service,
+            todo_service,
             foreground_monitor: ForegroundMonitor::new(
                 Box::new(PlatformForegroundWindowSource::new()),
                 Box::new(PlatformWindowMinimizer),
