@@ -1,11 +1,13 @@
 pub mod app_state;
 pub mod application;
 pub mod domain;
+pub mod infrastructure;
 pub mod presentation;
 
 use app_state::AppState;
-use application::settings_service::SettingsService;
-use tauri::Manager;
+use application::{foreground_monitor::ForegroundEffect, settings_service::SettingsService};
+use domain::pomodoro::PomodoroPhase;
+use tauri::{Emitter, Manager};
 #[cfg(windows)]
 use tauri_plugin_global_shortcut::{Code, GlobalShortcutExt, Modifiers, Shortcut, ShortcutState};
 
@@ -20,6 +22,66 @@ pub fn run() {
             let settings_service = SettingsService::new(app.path().app_data_dir()?);
             let settings = settings_service.load_or_default();
             app.manage(AppState::new(settings, settings_service));
+            let timer_app = app.handle().clone();
+            let _ = std::thread::Builder::new()
+                .name("pomodoro-ticker".to_owned())
+                .spawn(move || loop {
+                    std::thread::sleep(std::time::Duration::from_millis(250));
+                    let state = timer_app.state::<AppState>();
+                    let Ok((snapshot, changed)) = state.pomodoro_service.dispatch(
+                        domain::pomodoro::PomodoroEvent::Tick,
+                        std::time::Instant::now(),
+                    ) else {
+                        break;
+                    };
+                    if changed {
+                        let _ = timer_app.emit("timer://state", &snapshot);
+                    }
+                    let focus_settings = state
+                        .settings
+                        .read()
+                        .map(|settings| settings.focus_guard.clone());
+                    if let Ok(focus_settings) = focus_settings {
+                        let emergency = state
+                            .emergency_stopped
+                            .load(std::sync::atomic::Ordering::SeqCst);
+                        if let Ok(effects) = state.foreground_monitor.poll(
+                            std::time::Instant::now(),
+                            snapshot.phase == PomodoroPhase::Focus,
+                            emergency,
+                            &focus_settings,
+                        ) {
+                            for effect in effects {
+                                match effect {
+                                    ForegroundEffect::Detection(detection) => {
+                                        let _ = timer_app.emit("focus://detection", detection);
+                                    }
+                                    ForegroundEffect::Start(request) => {
+                                        if let Some(card) = timer_app.get_webview_window("card") {
+                                            let _ =
+                                                card.set_position(tauri::PhysicalPosition::new(
+                                                    request.start_x,
+                                                    request.y,
+                                                ));
+                                            let _ = card.show();
+                                            let _ =
+                                                card.emit("focus://intervention-start", request);
+                                        }
+                                    }
+                                    ForegroundEffect::Cancel(intervention_id) => {
+                                        if let Some(card) = timer_app.get_webview_window("card") {
+                                            let _ = card.emit(
+                                                "focus://intervention-cancel",
+                                                intervention_id,
+                                            );
+                                            let _ = card.hide();
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    }
+                });
             let tray_available = presentation::tray::build(app).is_ok();
             app.state::<AppState>()
                 .tray_available
@@ -54,8 +116,21 @@ pub fn run() {
         .invoke_handler(tauri::generate_handler![
             presentation::commands::get_bootstrap_state,
             presentation::commands::save_settings,
+            presentation::commands::get_timer_state,
+            presentation::commands::get_detection_state,
+            presentation::commands::complete_intervention,
+            presentation::commands::cancel_intervention,
+            presentation::commands::start_focus,
+            presentation::commands::pause_timer,
+            presentation::commands::resume_timer,
+            presentation::commands::skip_phase,
+            presentation::commands::stop_timer,
             presentation::commands::emergency_stop,
-            presentation::commands::resume_pet
+            presentation::commands::resume_pet,
+            presentation::commands::position_timer_bubble,
+            presentation::commands::show_utility_window,
+            presentation::commands::hide_utility_window,
+            presentation::commands::quit_application
         ])
         .on_window_event(|window, event| {
             if let tauri::WindowEvent::CloseRequested { api, .. } = event {

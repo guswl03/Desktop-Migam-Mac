@@ -7,9 +7,48 @@
 
 * { box-sizing: border-box; }
 html, body, #app { width: 100%; min-height: 100%; margin: 0; }
-body[data-window="pet"], body[data-window="card"] { overflow: hidden; background: transparent; }
-.pet-shell { display: grid; width: 100vw; height: 100vh; place-items: center; background: transparent; }
-.pet-placeholder { width: 100%; height: 100%; object-fit: contain; user-select: none; }
+html[data-window="pet"],
+html[data-window="card"],
+body[data-window="pet"],
+body[data-window="card"],
+body[data-window="pet"] #app,
+body[data-window="card"] #app {
+  overflow: hidden;
+  background: transparent;
+}
+html[data-window="timer"],
+body[data-window="timer"],
+body[data-window="timer"] #app {
+  height: 100%;
+  min-height: 0;
+  overflow: hidden;
+}
+.pet-shell {
+  display: grid;
+  width: 100vw;
+  height: 100vh;
+  place-items: end center;
+  overflow: hidden;
+  background: transparent;
+}
+.pet-sprite {
+  width: 96px;
+  height: 104px;
+  flex: none;
+  background-color: transparent;
+  background-repeat: no-repeat;
+  cursor: grab;
+  touch-action: none;
+  user-select: none;
+  -webkit-user-drag: none;
+}
+.pet-sprite:active { cursor: grabbing; }
+.kick-shell { display: grid; width: 100vw; height: 100vh; place-items: center; overflow: hidden; background: transparent; pointer-events: none; }
+.kick-character { width: 210px; height: 140px; object-fit: contain; transform: rotate(-7deg) scale(0.82); transform-origin: 70% 65%; opacity: 0; filter: drop-shadow(0 4px 2px rgb(0 0 0 / 0.14)); }
+.kick-character.flying { opacity: 1; animation: kick-flight 180ms linear infinite alternate; }
+.kick-character.impact { animation: kick-impact 150ms ease-out both; }
+@keyframes kick-flight { from { transform: rotate(-10deg) scale(0.80); } to { transform: rotate(-4deg) scale(0.88); } }
+@keyframes kick-impact { 0% { transform: rotate(-5deg) translateX(0) scale(0.9); } 45% { transform: rotate(2deg) translateX(13px) scale(1.05); } 100% { transform: rotate(-2deg) translateX(5px) scale(0.98); } }
 .panel { width: min(100%, 760px); margin: 0 auto; padding: 28px; }
 .settings-panel { padding-bottom: 48px; }
 h1 { margin: 0 0 24px; font-size: 32px; }
@@ -20,9 +59,506 @@ form { display: grid; gap: 18px; }
 fieldset { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 14px; padding: 18px; border: 1px solid #d8cebb; border-radius: 14px; background: #fffdf8; }
 legend { padding: 0 8px; font-weight: 700; }
 label { display: grid; gap: 7px; font-size: 14px; font-weight: 600; }
-input[type="number"] { width: 100%; padding: 10px 12px; border: 1px solid #bcb29f; border-radius: 8px; font: inherit; }
+input[type="number"], input[type="text"] { width: 100%; padding: 10px 12px; border: 1px solid #bcb29f; border-radius: 8px; background: white; color: inherit; font: inherit; }
 .checkbox-row { display: flex; grid-column: 1 / -1; align-items: center; }
 fieldset .muted { grid-column: 1 / -1; margin: 0; }
 .actions { display: flex; align-items: center; gap: 14px; }
 button { padding: 11px 22px; border: 0; border-radius: 9px; background: #72501f; color: white; font: inherit; font-weight: 700; cursor: pointer; }
-@media (max-width: 560px) { fieldset { grid-template-columns: 1fr; } }
+button.secondary { background: #ded7ca; color: #3d382f; }
+button:disabled { cursor: default; opacity: 0.42; }
+button:focus-visible, input:focus-visible { outline: 3px solid #2f6fed; outline-offset: 2px; }
+.rules-section { display: grid; gap: 12px; }
+.section-heading, .rule-heading { display: flex; align-items: center; justify-content: space-between; gap: 12px; }
+.section-heading h2 { margin: 0; font-size: 21px; }
+.rule-list { display: grid; gap: 12px; }
+.rule-card { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 12px; padding: 16px; border: 1px solid #d8cebb; border-radius: 12px; background: #fffdf8; }
+.rule-heading, .wide-field { grid-column: 1 / -1; }
+.rule-heading .checkbox-row { grid-column: auto; }
+.danger-text { padding: 5px 8px; background: transparent; color: #9b2c1f; font-size: 13px; }
+.empty-rules { margin: 0; padding: 22px; border: 1px dashed #bcb29f; border-radius: 12px; color: #6f6a61; text-align: center; }
+.detection-status { grid-column: 1 / -1; margin: 0; padding: 9px 11px; border-radius: 8px; background: #ede8dc; color: #625b50; font-size: 13px; font-weight: 700; }
+.detection-status.matched { background: #e7f5e7; color: #24652b; }
+.timer-panel { display: grid; width: 100%; height: 100%; min-height: 0; align-content: center; justify-items: center; padding: 12px 18px; overflow: hidden; background: linear-gradient(180deg, #fffdf8 0%, #f4ecdd 100%); }
+.timer-panel .eyebrow { margin-bottom: 2px; }
+.timer-panel h1 { margin-bottom: 2px; font-size: 23px; }
+.timer-phase { margin: 0; color: #72501f; font-size: 16px; font-weight: 800; }
+.timer-remaining { margin: 0; font-variant-numeric: tabular-nums; font-size: 48px; font-weight: 800; line-height: 1; letter-spacing: 0.02em; }
+.timer-sessions { margin: 2px 0 7px; color: #6f6a61; font-size: 13px; }
+.timer-actions { display: flex; width: 100%; max-width: 310px; justify-content: center; gap: 7px; }
+.timer-actions button { min-width: 0; flex: 1 1 0; padding: 8px 7px; font-size: 12px; white-space: nowrap; }
+.timer-actions button:only-child { max-width: 150px; }
+.timer-actions button[hidden] { display: none; }
+.timer-error { min-height: 15px; margin: 4px 0 0; color: #9b2c1f; font-size: 11px; }
+@media (max-width: 560px) { fieldset, .rule-card { grid-template-columns: 1fr; } }
+
+/* WinDbg-inspired utility windows */
+.sr-only { position: absolute; width: 1px; height: 1px; padding: 0; margin: -1px; overflow: hidden; clip: rect(0, 0, 0, 0); white-space: nowrap; border: 0; }
+body[data-window="settings"], body[data-window="timer"] { color: #1b1b1b; background: #f1f1f3; font-family: "Segoe UI", sans-serif; }
+body[data-window="settings"] .panel, body[data-window="timer"] .panel { width: 100%; max-width: none; margin: 0; }
+.debug-chrome { flex: none; border-bottom: 1px solid #b9bdc5; background: #eeeef1; box-shadow: inset 0 -1px #f8f8f9; }
+.debug-menu { display: flex; height: 28px; align-items: stretch; gap: 3px; padding: 0 8px; border-bottom: 1px solid #d2d4d9; background: #f8f8fa; color: #202020; font-size: 12px; }
+.debug-menu span { display: grid; min-width: 58px; place-items: center; padding: 0 10px; border-bottom: 2px solid transparent; }
+.debug-menu span.active { background: #0878d1; color: #fff; }
+.debug-menu span:not(.active) { border-bottom-color: #0878d1; color: #075ea8; }
+.debug-ribbon { display: flex; height: 58px; align-items: stretch; gap: 0; padding: 5px 10px; }
+.debug-ribbon span { display: grid; min-width: 92px; place-items: center; align-content: center; gap: 2px; border-right: 1px solid #d5d7dc; color: #454545; font-size: 11px; }
+.debug-ribbon b { color: #0878d1; font-size: 20px; font-weight: 500; line-height: 1; }
+.debug-ribbon.compact { height: 43px; padding: 3px 8px; }
+.debug-ribbon.compact span { min-width: 82px; font-size: 10px; }
+.debug-ribbon.compact b { font-size: 15px; }
+.debug-document, .timer-debug-pane { border: 1px solid #b9bdc5; background: #fff; box-shadow: inset 0 0 0 1px #f5f5f6; }
+.debug-pane-title { display: flex; height: 26px; align-items: center; justify-content: space-between; padding: 0 8px; border-bottom: 1px solid #b9bdc5; background: #eceef2; color: #111; font: 12px Consolas, "Cascadia Mono", monospace; }
+.debug-statusbar { display: flex; min-height: 22px; flex: none; align-items: center; justify-content: space-between; gap: 10px; padding: 2px 8px; border-top: 1px solid #9ca1aa; background: #0878d1; color: #fff; font: 11px Consolas, "Cascadia Mono", monospace; }
+
+body[data-window="settings"] .settings-panel { min-height: 100vh; padding: 0; background: #e9eaed; }
+.settings-chrome { position: sticky; z-index: 2; top: 0; }
+.settings-panel .debug-document { margin: 8px 10px; }
+.settings-panel .debug-document > :not(.debug-pane-title) { margin-right: 14px; margin-left: 14px; }
+.settings-heading { display: flex; align-items: end; justify-content: space-between; gap: 16px; padding-top: 14px; }
+.settings-heading h1 { margin: 0 0 12px; font-size: 25px; font-weight: 500; }
+.settings-heading .eyebrow { margin: 0 0 2px; }
+.debug-build { margin-bottom: 14px; color: #60636a; font: 11px Consolas, "Cascadia Mono", monospace; }
+body[data-window="settings"] .eyebrow, body[data-window="timer"] .eyebrow { color: #075ea8; font: 700 10px Consolas, "Cascadia Mono", monospace; letter-spacing: .06em; }
+body[data-window="settings"] form { gap: 10px; padding-bottom: 14px; }
+body[data-window="settings"] fieldset { gap: 10px 12px; padding: 12px; border: 1px solid #b9bdc5; border-radius: 0; background: #fafafa; }
+body[data-window="settings"] legend { padding: 2px 8px; border: 1px solid #b9bdc5; background: #eceef2; color: #202020; font: 600 12px "Segoe UI", sans-serif; }
+body[data-window="settings"] label { gap: 4px; color: #303238; font-size: 12px; font-weight: 600; }
+body[data-window="settings"] input[type="number"], body[data-window="settings"] input[type="text"] { padding: 7px 8px; border: 1px solid #9ca1aa; border-radius: 0; background: #fff; font: 12px Consolas, "Cascadia Mono", monospace; box-shadow: inset 1px 1px #e7e8eb; }
+body[data-window="settings"] input[type="checkbox"] { accent-color: #0878d1; }
+body[data-window="settings"] .muted { color: #60636a; font-size: 11px; }
+body[data-window="settings"] .warning { padding: 8px 10px; border: 1px solid #d6a84a; border-radius: 0; background: #fff8d8; color: #604500; font-size: 12px; }
+body[data-window="settings"] button, body[data-window="timer"] button { padding: 7px 14px; border: 1px solid #075ea8; border-radius: 0; background: #0878d1; color: #fff; font-size: 12px; font-weight: 600; box-shadow: inset 0 1px rgb(255 255 255 / .25); }
+body[data-window="settings"] button:hover, body[data-window="timer"] button:hover { background: #006cbe; }
+body[data-window="settings"] button.secondary, body[data-window="timer"] button.secondary { border-color: #9ca1aa; background: #e8e9ec; color: #202020; }
+body[data-window="settings"] .rules-section { gap: 8px; }
+body[data-window="settings"] .section-heading h2 { font-size: 16px; font-weight: 600; }
+body[data-window="settings"] .rule-list { gap: 7px; }
+body[data-window="settings"] .rule-card { gap: 9px 12px; padding: 11px; border: 1px solid #b9bdc5; border-radius: 0; background: #fafafa; }
+body[data-window="settings"] .danger-text { border-color: transparent; background: transparent; color: #a4262c; box-shadow: none; }
+body[data-window="settings"] .empty-rules { padding: 15px; border: 1px dashed #9ca1aa; border-radius: 0; background: #fafafa; font: 12px Consolas, monospace; }
+body[data-window="settings"] .detection-status { padding: 7px 9px; border: 1px solid #b9bdc5; border-radius: 0; background: #eceef2; color: #3e4248; font: 600 11px Consolas, monospace; }
+body[data-window="settings"] .detection-status.matched { border-color: #6ea86e; background: #e7f4e7; color: #145c20; }
+body[data-window="settings"] .actions { min-height: 36px; padding: 6px 0; border-top: 1px solid #c5c8ce; }
+body[data-window="settings"] #save-status { font: 11px Consolas, monospace; }
+
+body[data-window="timer"] .timer-panel { display: flex; width: 100%; height: 100%; padding: 0; align-items: stretch; background: #e9eaed; }
+.timer-chrome { width: 100%; }
+.timer-debug-pane { display: flex; min-height: 0; flex: 1; flex-direction: column; margin: 5px 6px; }
+.timer-readout { display: grid; flex: 1; grid-template-columns: 1fr auto; align-items: center; gap: 10px; padding: 8px 13px 2px; }
+.timer-readout .eyebrow { margin: 0 0 3px; }
+body[data-window="timer"] .timer-phase { margin: 0; color: #202020; font: 600 15px Consolas, "Cascadia Mono", monospace; }
+body[data-window="timer"] .timer-remaining { margin: 0; color: #075ea8; font: 700 41px/1 Consolas, "Cascadia Mono", monospace; letter-spacing: -0.04em; }
+body[data-window="timer"] .timer-sessions { margin: 0; padding: 2px 13px 6px; border-bottom: 1px solid #d2d4d9; color: #555960; font: 11px Consolas, monospace; }
+body[data-window="timer"] .timer-actions { width: auto; max-width: none; min-height: 38px; padding: 5px 8px; gap: 5px; background: #f5f5f6; }
+body[data-window="timer"] .timer-actions button { padding: 5px 7px; font-size: 11px; }
+body[data-window="timer"] .timer-actions button:only-child { max-width: 116px; }
+body[data-window="timer"] .timer-error { min-height: 0; margin: 0; color: #fff; font-size: 10px; }
+
+@media (max-width: 560px) {
+  .debug-menu span { min-width: auto; padding: 0 7px; }
+  .debug-ribbon span { min-width: 72px; }
+  .settings-heading { align-items: start; flex-direction: column; gap: 0; }
+  .debug-build { margin-top: -8px; }
+}
+
+/* Raw debugger pass: dense, square, and intentionally close to classic Win32 tools. */
+body[data-window="settings"], body[data-window="timer"] {
+  background: #d9dade;
+  font-size: 12px;
+}
+.debug-chrome {
+  border-bottom-color: #858991;
+  background: #dedfe2;
+  box-shadow: none;
+}
+.debug-menu {
+  height: 24px;
+  gap: 0;
+  padding: 0;
+  border-bottom-color: #a6a9af;
+  background: #f1f1f1;
+  font-size: 11px;
+}
+.debug-menu span {
+  min-width: auto;
+  place-items: center start;
+  padding: 0 13px;
+  border-right: 1px solid #d1d1d1;
+  border-bottom: 0;
+}
+.debug-menu span.active {
+  background: #0067b8;
+  color: #fff;
+}
+.debug-menu span:not(.active) {
+  color: #111;
+}
+.debug-ribbon {
+  height: 48px;
+  padding: 2px 4px;
+  background: #e5e5e7;
+}
+.debug-ribbon span {
+  min-width: 80px;
+  gap: 0;
+  border-right-color: #b3b5ba;
+  border-left: 1px solid #f8f8f8;
+  color: #4d4d4d;
+  font-size: 10px;
+}
+.debug-ribbon b {
+  color: #696b70;
+  font-size: 16px;
+}
+.debug-ribbon.compact {
+  height: 34px;
+  padding: 1px 3px;
+}
+.debug-ribbon.compact span {
+  min-width: 68px;
+  font-size: 9px;
+}
+.debug-ribbon.compact b {
+  font-size: 12px;
+}
+.debug-document, .timer-debug-pane {
+  border-width: 1px;
+  border-style: solid;
+  border-color: #74777d #fff #fff #74777d;
+  background: #f7f7f7;
+  box-shadow: none;
+}
+.debug-pane-title {
+  height: 22px;
+  padding: 0 5px;
+  border-bottom-color: #858991;
+  background: #d8d9dc;
+  font-size: 11px;
+}
+.debug-command-line {
+  display: flex;
+  height: 24px;
+  flex: none;
+  align-items: center;
+  gap: 7px;
+  padding: 0 6px;
+  border-bottom: 1px solid #9da0a6;
+  background: #fff;
+  color: #111;
+  font: 11px Consolas, "Cascadia Mono", monospace;
+}
+.debug-command-line span:first-child { color: #064f96; }
+.debug-caret { color: #111; }
+.debug-statusbar {
+  min-height: 19px;
+  padding: 1px 5px;
+  border-top-color: #575b63;
+  background: #0067b8;
+  font-size: 10px;
+}
+
+body[data-window="settings"] .settings-panel { background: #cfd1d5; }
+.settings-panel .debug-document { margin: 3px 4px; }
+.settings-panel .debug-document > :not(.debug-pane-title):not(.debug-command-line) {
+  margin-right: 7px;
+  margin-left: 7px;
+}
+.settings-heading {
+  align-items: center;
+  padding-top: 7px;
+}
+.settings-heading h1 {
+  margin: 0 0 5px;
+  font: 600 19px/1.1 "Segoe UI", sans-serif;
+}
+.debug-build { margin-bottom: 5px; font-size: 10px; }
+body[data-window="settings"] .eyebrow, body[data-window="timer"] .eyebrow {
+  color: #333;
+  font-size: 9px;
+  letter-spacing: .02em;
+}
+body[data-window="settings"] form {
+  gap: 6px;
+  padding-bottom: 6px;
+}
+body[data-window="settings"] fieldset {
+  gap: 6px 8px;
+  padding: 8px;
+  border-color: #7f8288 #fff #fff #7f8288;
+  background: #ececec;
+}
+body[data-window="settings"] legend {
+  padding: 1px 5px;
+  border-color: #fff #888b91 #888b91 #fff;
+  background: #dedede;
+  font-size: 11px;
+}
+body[data-window="settings"] label {
+  gap: 2px;
+  color: #111;
+  font-size: 11px;
+  font-weight: 500;
+}
+body[data-window="settings"] input[type="number"], body[data-window="settings"] input[type="text"] {
+  padding: 4px 5px;
+  border-color: #696c72 #fff #fff #696c72;
+  font-size: 11px;
+  box-shadow: inset 1px 1px #c8c8c8;
+}
+body[data-window="settings"] .muted { color: #4d4d4d; font-size: 10px; }
+body[data-window="settings"] .warning {
+  padding: 5px 7px;
+  border-color: #7f6a29;
+  background: #fff4b8;
+  font-size: 11px;
+}
+body[data-window="settings"] button, body[data-window="timer"] button {
+  padding: 5px 11px;
+  border-width: 1px;
+  border-style: solid;
+  border-color: #fff #707070 #707070 #fff;
+  background: #dedede;
+  color: #111;
+  font-size: 11px;
+  font-weight: 500;
+  box-shadow: inset -1px -1px #aaa, inset 1px 1px #f8f8f8;
+}
+body[data-window="settings"] button:hover, body[data-window="timer"] button:hover { background: #e9e9e9; }
+body[data-window="settings"] button:active, body[data-window="timer"] button:active {
+  border-color: #707070 #fff #fff #707070;
+  box-shadow: inset 1px 1px #aaa;
+  transform: translate(1px, 1px);
+}
+body[data-window="settings"] .actions button[type="submit"] { outline: 1px solid #0067b8; outline-offset: 1px; }
+body[data-window="settings"] button.secondary, body[data-window="timer"] button.secondary {
+  border-color: #fff #707070 #707070 #fff;
+  background: #dedede;
+}
+body[data-window="settings"] .rules-section { gap: 4px; }
+body[data-window="settings"] .section-heading h2 { font-size: 14px; }
+body[data-window="settings"] .rule-list { gap: 3px; }
+body[data-window="settings"] .rule-card {
+  gap: 5px 8px;
+  padding: 7px;
+  border-color: #7f8288 #fff #fff #7f8288;
+  background: #e9e9e9;
+}
+body[data-window="settings"] .danger-text {
+  border: 0;
+  background: transparent;
+  color: #8f1111;
+  box-shadow: none;
+}
+body[data-window="settings"] .detection-status {
+  padding: 4px 6px;
+  border-color: #8c8f95;
+  background: #d9dade;
+  font-size: 10px;
+}
+body[data-window="settings"] .actions {
+  min-height: 30px;
+  padding: 4px 0;
+  border-top-color: #989ba1;
+}
+
+body[data-window="timer"] .timer-panel { background: #cfd1d5; }
+.timer-debug-pane { margin: 3px 4px; }
+.timer-readout {
+  gap: 6px;
+  padding: 5px 8px 1px;
+  background-image: repeating-linear-gradient(0deg, transparent 0, transparent 20px, rgb(0 0 0 / .025) 21px);
+}
+body[data-window="timer"] .timer-phase { font-size: 13px; }
+body[data-window="timer"] .timer-remaining {
+  color: #111;
+  font-size: 37px;
+  font-weight: 600;
+}
+body[data-window="timer"] .timer-sessions {
+  padding: 1px 8px 4px;
+  border-bottom-color: #a3a6ac;
+  color: #333;
+  font-size: 10px;
+}
+body[data-window="timer"] .timer-actions {
+  min-height: 32px;
+  gap: 3px;
+  padding: 3px 5px;
+  border-top: 1px solid #fff;
+  background: #dedede;
+}
+body[data-window="timer"] .timer-actions button { padding: 4px 6px; font-size: 10px; }
+
+/* Pet-attached timer bubble */
+html[data-window="timer"],
+body[data-window="timer"],
+body[data-window="timer"] #app {
+  background: transparent;
+}
+body[data-window="timer"] .timer-panel {
+  display: flex;
+  width: 100%;
+  height: 100%;
+  padding: 2px 4px 18px;
+  overflow: hidden;
+  background: transparent;
+}
+.timer-bubble {
+  position: relative;
+  display: flex;
+  min-width: 0;
+  min-height: 0;
+  flex: 1;
+  flex-direction: column;
+  border: 2px solid #161616;
+  background: #f1f1f1;
+  box-shadow: 2px 2px 0 rgb(0 0 0 / .3);
+}
+.timer-bubble::before,
+.timer-bubble::after {
+  position: absolute;
+  z-index: 2;
+  left: calc(50% - 13px);
+  width: 0;
+  height: 0;
+  border-right: 13px solid transparent;
+  border-left: 13px solid transparent;
+  content: "";
+}
+.timer-bubble::before {
+  bottom: -18px;
+  border-top: 18px solid #161616;
+}
+.timer-bubble::after {
+  bottom: -14px;
+  margin-left: 2px;
+  border-right-width: 11px;
+  border-left-width: 11px;
+  border-top: 15px solid #f1f1f1;
+}
+.timer-bubble-title {
+  display: flex;
+  height: 22px;
+  flex: none;
+  align-items: center;
+  justify-content: space-between;
+  padding-left: 5px;
+  border-bottom: 1px solid #74777d;
+  background: #d8d9dc;
+  font: 10px Consolas, "Cascadia Mono", monospace;
+}
+body[data-window="timer"] .timer-bubble-title button {
+  width: 22px;
+  height: 20px;
+  padding: 0;
+  border: 0;
+  border-left: 1px solid #898c92;
+  background: #dedede;
+  box-shadow: none;
+  color: #111;
+  font: 15px/1 "Segoe UI", sans-serif;
+}
+.timer-bubble .debug-command-line {
+  height: 21px;
+  padding: 0 5px;
+  font-size: 9px;
+}
+.timer-bubble .timer-readout {
+  min-height: 0;
+  padding: 3px 7px 0;
+}
+body[data-window="timer"] .timer-bubble .timer-phase { font-size: 12px; }
+body[data-window="timer"] .timer-bubble .timer-remaining { font-size: 32px; }
+body[data-window="timer"] .timer-bubble .timer-sessions {
+  padding: 0 7px 3px;
+  font-size: 9px;
+}
+body[data-window="timer"] .timer-bubble .timer-actions {
+  min-height: 29px;
+  padding: 2px 4px;
+}
+body[data-window="timer"] .timer-bubble .timer-actions button {
+  padding: 3px 4px;
+  font-size: 9px;
+}
+.timer-bubble-status {
+  display: flex;
+  min-height: 17px;
+  flex: none;
+  align-items: center;
+  justify-content: space-between;
+  gap: 5px;
+  padding: 1px 4px;
+  border-top: 1px solid #555960;
+  background: #0067b8;
+  color: #fff;
+  font: 9px Consolas, "Cascadia Mono", monospace;
+}
+
+/* Compact display-only timer: controls live in the pet context menu. */
+body[data-window="timer"] .timer-panel { padding: 2px 3px 14px; }
+.timer-bubble {
+  align-items: stretch;
+  justify-content: center;
+  box-shadow: 1px 1px 0 rgb(0 0 0 / .35);
+}
+.timer-bubble::before,
+.timer-bubble::after { left: calc(50% - 9px); border-right-width: 9px; border-left-width: 9px; }
+.timer-bubble::before { bottom: -13px; border-top-width: 13px; }
+.timer-bubble::after {
+  bottom: -9px;
+  margin-left: 2px;
+  border-right-width: 7px;
+  border-left-width: 7px;
+  border-top-width: 10px;
+}
+body[data-window="timer"] .timer-bubble-close {
+  position: absolute;
+  z-index: 3;
+  top: 1px;
+  right: 1px;
+  width: 16px;
+  height: 16px;
+  padding: 0;
+  border: 0;
+  background: transparent;
+  box-shadow: none;
+  color: #666;
+  font: 13px/1 "Segoe UI", sans-serif;
+}
+body[data-window="timer"] .timer-bubble-close:hover { background: #d5d5d5; color: #111; }
+.timer-bubble .timer-readout {
+  display: flex;
+  min-height: 0;
+  flex: none;
+  align-items: baseline;
+  justify-content: center;
+  gap: 7px;
+  padding: 5px 17px 4px 5px;
+  background: transparent;
+}
+body[data-window="timer"] .timer-bubble .timer-phase {
+  flex: none;
+  color: #333;
+  font-size: 10px;
+  font-weight: 600;
+}
+body[data-window="timer"] .timer-bubble .timer-remaining {
+  flex: none;
+  color: #111;
+  font-size: 23px;
+  font-weight: 600;
+  letter-spacing: -.05em;
+}
+body[data-window="timer"] .timer-bubble .timer-error {
+  position: absolute;
+  right: 4px;
+  bottom: 1px;
+  left: 4px;
+  overflow: hidden;
+  color: #9a0000;
+  font: 8px Consolas, monospace;
+  text-align: center;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}

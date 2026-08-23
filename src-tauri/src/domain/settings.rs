@@ -47,6 +47,8 @@ pub enum ValidationError {
     LongBreakMinutesOutOfRange(u16),
     #[error("sessions before a long break must be positive")]
     SessionsBeforeLongBreakMustBePositive,
+    #[error("distraction rule {0} is invalid: {1}")]
+    InvalidDistractionRule(usize, String),
 }
 
 #[derive(Debug, Error)]
@@ -122,8 +124,13 @@ impl Settings {
         if self.pomodoro.sessions_before_long_break == 0 {
             return Err(ValidationError::SessionsBeforeLongBreakMustBePositive);
         }
+        for (index, rule) in self.focus_guard.rules.iter().enumerate() {
+            rule.validate().map_err(|error| {
+                ValidationError::InvalidDistractionRule(index + 1, error.to_string())
+            })?;
+        }
         self.pet.visual_scale_percent = self.pet.visual_scale_percent.clamp(50, 200);
-        if self.focus_guard.rules.is_empty() {
+        if !self.focus_guard.rules.iter().any(|rule| rule.enabled) {
             self.focus_guard.intervention_enabled = false;
         }
         Ok(self)

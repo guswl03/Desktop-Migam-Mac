@@ -1,6 +1,23 @@
 export interface DistractionRule {
+  id: string;
+  name: string;
+  enabled: boolean;
   processName?: string;
   windowTitle?: string;
+  graceSeconds: number;
+  cooldownSeconds: number;
+}
+
+export interface DetectionState {
+  matched: boolean;
+  ruleId?: string;
+}
+
+export interface InterventionRequest {
+  interventionId: number;
+  startX: number;
+  impactX: number;
+  y: number;
 }
 
 export interface Settings {
