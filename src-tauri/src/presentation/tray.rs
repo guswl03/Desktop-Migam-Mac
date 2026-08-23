@@ -50,7 +50,7 @@ pub fn build(app: &App) -> tauri::Result<()> {
     TrayIconBuilder::with_id(CPU_TRAY_ID)
         .menu(&menu)
         .icon(cpu_icon)
-        .tooltip("CPU 0% · 감자봇 시스템 모니터")
+        .tooltip("CPU 0% · migam desktop")
         .show_menu_on_left_click(true)
         .on_menu_event(|app, event| match event.id().as_ref() {
             "show_pet" => show_window(app, "pet"),
@@ -109,7 +109,7 @@ pub fn build(app: &App) -> tauri::Result<()> {
     TrayIconBuilder::with_id(MEMORY_TRAY_ID)
         .menu(&menu)
         .icon(resource_icon(ResourceKind::Memory, 0))
-        .tooltip("MEM 0% · 감자봇 시스템 모니터")
+        .tooltip("MEM 0% · migam desktop")
         .show_menu_on_left_click(true)
         .build(app)?;
     Ok(())

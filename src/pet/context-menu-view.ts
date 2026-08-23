@@ -17,7 +17,7 @@ const phaseLabels: Record<TimerState["phase"], string> = {
 export async function mountPetContextMenu(container: HTMLElement): Promise<() => void> {
   container.innerHTML = `
     <main class="pet-command" aria-label="감자봇 명령 메뉴">
-      <header class="pet-command-title"><span>DesktopPet.Command</span><button type="button" data-close aria-label="닫기">×</button></header>
+      <header class="pet-command-title"><span>MigamDesktop.Command</span><button type="button" data-close aria-label="닫기">×</button></header>
       <div class="pet-command-tabs" aria-hidden="true"><span class="active">Home</span><span>Focus</span><span>System</span></div>
       <section class="pet-command-status" aria-label="현재 상태">
         <div><small>TIMER</small><strong id="command-timer">READY --:--</strong></div>

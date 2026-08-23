@@ -179,9 +179,9 @@ function renderSettings(
         </div>
       </header>
       <section class="debug-document">
-        <div class="debug-pane-title"><span>DesktopPet.Settings</span><span aria-hidden="true">×</span></div>
+        <div class="debug-pane-title"><span>MigamDesktop.Settings</span><span aria-hidden="true">×</span></div>
         <div class="debug-command-line" aria-hidden="true"><span>0:000&gt;</span><span>.settings /local /schema:${settings.schemaVersion}</span><span class="debug-caret">_</span></div>
-        <div class="settings-heading"><div><p class="eyebrow">DESKTOP PET CONFIGURATION</p><h1>설정</h1></div><span class="debug-build">LOCAL · SCHEMA ${settings.schemaVersion}</span></div>
+        <div class="settings-heading"><div><p class="eyebrow">MIGAM DESKTOP CONFIGURATION</p><h1>설정</h1></div><span class="debug-build">LOCAL · SCHEMA ${settings.schemaVersion}</span></div>
         ${emergencyShortcutAvailable ? "" : '<p class="warning" role="alert">Ctrl+Shift+F12 긴급 중지 단축키를 등록하지 못했습니다. 트레이의 긴급 중지 메뉴를 사용해 주세요.</p>'}
         ${trayAvailable ? "" : '<p class="warning" role="alert">시스템 트레이를 사용할 수 없습니다. 앱 창을 닫으면 복구 메뉴에 접근하지 못할 수 있습니다.</p>'}
         <form id="settings-form">

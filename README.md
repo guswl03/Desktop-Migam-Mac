@@ -1,4 +1,4 @@
-# 미친감자 Desktop Pet MVP
+# migam desktop
 
 Windows 11 전용 Tauri 2 + Rust + 순수 TypeScript 투명 오버레이 데스크톱 펫 프로젝트입니다. 감자봇이 바탕화면을 돌아다니고, 사용자가 드래그하거나 던질 수 있으며, 뽀모도로 집중 세션과 방해 창 개입 기능을 제공하는 것을 목표로 합니다.
 

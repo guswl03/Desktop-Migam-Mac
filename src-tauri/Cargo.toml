@@ -1,8 +1,8 @@
 [package]
-name = "desktop-pet-mvp"
+name = "migam-desktop"
 version = "0.1.0"
-description = "Windows 11 desktop pet MVP"
-authors = ["Desktop Pet MVP contributors"]
+description = "migam desktop for Windows 11"
+authors = ["migam desktop contributors"]
 edition = "2021"
 
 [lib]
