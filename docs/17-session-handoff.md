@@ -22,6 +22,10 @@
 
 ## 최근 앱 아이콘 작업 요약
 
+- 배포 빌드를 막던 미추적 `images/characters/gamjabot/final/spritesheet-extended.webp` 참조를 Git에 포함된 `references/base-spritesheet-extended.png`로 교체했다. 2026-08-23 NSIS 빌드가 통과했고 `src-tauri/target/release/bundle/nsis/Desktop Pet MVP_0.1.0_x64-setup.exe`가 생성됐다.
+- `bundle.windows.nsis.installerIcon`과 `uninstallerIcon`을 `images/app/icon.ico`로 지정해 NSIS 기본 다운로드 아이콘 대신 청록색 감자봇 얼굴이 표시되도록 했다.
+- release `main.rs`에 Windows GUI subsystem 속성을 적용했다. 새 release EXE의 PE subsystem 값 2를 확인했으며 설치판 실행 시 검은 터미널 창이 더 이상 생성되지 않는다.
+- 독립 투두 창의 WinDbg 분위기는 명령줄·각진 패널·파란 상태바로 유지하되, 클릭할 수 없는 File/Home/Focus/View 메뉴와 장식용 리본 및 내부 가짜 닫기 표시는 제거했다.
 - 사용자 제공 청록색 감자봇 얼굴에서 좌측 위 숫자와 바깥 흰 여백을 제외하고 투명 512×512 원본 `images/app/icon-source.png`를 만들었다.
 - Tauri 아이콘 생성기로 다중 해상도 Windows `images/app/icon.ico`를 다시 만들었고 release 실행 파일에서 새 아이콘을 추출해 확인했다. 제목 표시줄과 작업표시줄 아이콘은 앱을 완전히 종료하고 재실행해야 바뀐다.
 - 기존 `tauri dev`가 오후 7:45의 구형 debug 실행 파일을 다시 사용해 보라색 아이콘과 최신 프런트/구형 설정 계약 불일치가 함께 나타났다. 실행 중 프로세스를 종료하고 해당 패키지의 debug 산출물을 정리한 뒤 완전 재빌드했으며, 새 debug 실행 파일에서 감자봇 아이콘을 직접 추출해 확인했다.

@@ -34,6 +34,10 @@
 
 ## 오늘 완료
 
+- [x] Git에서 누락된 `final/spritesheet-extended.webp` 참조를 추적 중인 원본 아틀라스로 교체하고 NSIS 설치 EXE 생성 검증
+- [x] NSIS 설치·제거 프로그램 아이콘을 청록색 감자봇 얼굴 ICO로 명시하고 설치 EXE 재생성
+- [x] release 실행 파일을 Windows GUI subsystem으로 전환해 설치판 실행 시 터미널 창이 함께 열리는 문제 수정
+- [x] 독립 투두 창 상단의 동작하지 않는 File/Home/Focus/View 메뉴·리본과 가짜 닫기 표시 제거
 - [x] GAMCHA 하단 OUTFIT 바 제거와 보유 코스튬 전용 인벤토리 탭 구현
 - [x] 인벤토리 상세에 실제 감자펫 착용 미리보기와 슬라이더 즉시 반영 연결
 - [x] GAMCHA 전체 화면을 펫이 있는 모니터의 작업 영역에 맞춰 작업표시줄 침범 제거

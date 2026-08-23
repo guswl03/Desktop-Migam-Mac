@@ -1,4 +1,4 @@
-import gamjabotAtlas from "../../images/characters/gamjabot/final/spritesheet-extended.webp";
+import gamjabotAtlas from "../../images/characters/gamjabot/references/base-spritesheet-extended.png";
 import dragged00 from "../../images/characters/gamjabot/extra/frames/dragged/00.png";
 import dragged01 from "../../images/characters/gamjabot/extra/frames/dragged/01.png";
 import dragged02 from "../../images/characters/gamjabot/extra/frames/dragged/02.png";
