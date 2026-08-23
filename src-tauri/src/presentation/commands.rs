@@ -9,6 +9,7 @@ use crate::{
         foreground_monitor::DetectionState,
         gamcha_service::{CostumeAlignment, GamchaDrawResult, GamchaSnapshot},
         pomodoro_service::TimerState,
+        todo_service::TodoSnapshot,
     },
     domain::{
         pomodoro::{PomodoroEvent, PomodoroPhase},
@@ -105,6 +106,11 @@ pub(crate) fn tick_timer(app: &AppHandle, state: &AppState) -> Result<TimerState
         let _ = app.emit("timer://state", &snapshot);
     }
     if focus_completed {
+        let todo = state.todo_service.finish_focus()?;
+        let _ = app.emit("todo://changed", &todo);
+        if todo.pending_focus_todo.is_some() {
+            let _ = app.emit("todo://focus-completed", &todo);
+        }
         let gamcha = state.gamcha_service.award_ticket()?;
         let _ = app.emit("gamcha://ticket-earned", &gamcha);
         let _ = show_gamcha_reward(app);
@@ -125,6 +131,100 @@ pub fn get_detection_state(state: State<'_, AppState>) -> Result<DetectionState,
 #[tauri::command]
 pub fn get_gamcha_state(state: State<'_, AppState>) -> Result<GamchaSnapshot, String> {
     state.gamcha_service.snapshot()
+}
+
+fn emit_todo(app: &AppHandle, snapshot: &TodoSnapshot, celebrated: bool) {
+    let _ = app.emit("todo://changed", snapshot);
+    if celebrated {
+        let _ = app.emit("todo://all-completed", snapshot);
+    }
+}
+
+#[tauri::command]
+pub fn get_todo_state(state: State<'_, AppState>) -> Result<TodoSnapshot, String> {
+    state.todo_service.snapshot()
+}
+
+#[tauri::command]
+pub fn add_todo(
+    app: AppHandle,
+    state: State<'_, AppState>,
+    text: String,
+) -> Result<TodoSnapshot, String> {
+    let snapshot = state.todo_service.add(&text)?;
+    emit_todo(&app, &snapshot, false);
+    Ok(snapshot)
+}
+
+#[tauri::command]
+pub fn update_todo(
+    app: AppHandle,
+    state: State<'_, AppState>,
+    id: String,
+    text: String,
+) -> Result<TodoSnapshot, String> {
+    let snapshot = state.todo_service.update(&id, &text)?;
+    emit_todo(&app, &snapshot, false);
+    Ok(snapshot)
+}
+
+#[tauri::command]
+pub fn set_todo_completed(
+    app: AppHandle,
+    state: State<'_, AppState>,
+    id: String,
+    completed: bool,
+) -> Result<TodoSnapshot, String> {
+    let (snapshot, celebrated) = state.todo_service.set_completed(&id, completed)?;
+    emit_todo(&app, &snapshot, celebrated);
+    Ok(snapshot)
+}
+
+#[tauri::command]
+pub fn select_todo(
+    app: AppHandle,
+    state: State<'_, AppState>,
+    id: Option<String>,
+) -> Result<TodoSnapshot, String> {
+    let snapshot = state.todo_service.select(id)?;
+    emit_todo(&app, &snapshot, false);
+    Ok(snapshot)
+}
+
+#[tauri::command]
+pub fn delete_todo(
+    app: AppHandle,
+    state: State<'_, AppState>,
+    id: String,
+) -> Result<TodoSnapshot, String> {
+    let snapshot = state.todo_service.delete(&id)?;
+    emit_todo(&app, &snapshot, false);
+    Ok(snapshot)
+}
+
+#[tauri::command]
+pub fn resolve_focus_todo(
+    app: AppHandle,
+    state: State<'_, AppState>,
+    action: String,
+) -> Result<TodoSnapshot, String> {
+    if !matches!(action.as_str(), "complete" | "continue" | "next") {
+        return Err("unsupported focus todo action".to_owned());
+    }
+    let (mut snapshot, celebrated) = state.todo_service.resolve_focus(action == "complete")?;
+    emit_todo(&app, &snapshot, celebrated);
+    if action == "next" {
+        let timer = dispatch_timer(&app, &state, PomodoroEvent::Tick)?;
+        if matches!(
+            timer.phase,
+            PomodoroPhase::ShortBreak | PomodoroPhase::LongBreak
+        ) {
+            let _ = dispatch_timer(&app, &state, PomodoroEvent::Skip)?;
+            snapshot = state.todo_service.begin_focus()?;
+            emit_todo(&app, &snapshot, false);
+        }
+    }
+    Ok(snapshot)
 }
 
 #[tauri::command]
@@ -196,7 +296,13 @@ pub fn cancel_intervention(
 
 #[tauri::command]
 pub fn start_focus(app: AppHandle, state: State<'_, AppState>) -> Result<TimerState, String> {
-    dispatch_timer(&app, &state, PomodoroEvent::Start)
+    let before = dispatch_timer(&app, &state, PomodoroEvent::Tick)?;
+    let snapshot = dispatch_timer(&app, &state, PomodoroEvent::Start)?;
+    if before.phase == PomodoroPhase::Stopped && snapshot.phase == PomodoroPhase::Focus {
+        let todo = state.todo_service.begin_focus()?;
+        emit_todo(&app, &todo, false);
+    }
+    Ok(snapshot)
 }
 
 #[tauri::command]
@@ -211,12 +317,24 @@ pub fn resume_timer(app: AppHandle, state: State<'_, AppState>) -> Result<TimerS
 
 #[tauri::command]
 pub fn skip_phase(app: AppHandle, state: State<'_, AppState>) -> Result<TimerState, String> {
-    dispatch_timer(&app, &state, PomodoroEvent::Skip)
+    let before = dispatch_timer(&app, &state, PomodoroEvent::Tick)?;
+    let snapshot = dispatch_timer(&app, &state, PomodoroEvent::Skip)?;
+    if before.phase == PomodoroPhase::Focus {
+        let todo = state.todo_service.cancel_focus()?;
+        emit_todo(&app, &todo, false);
+    } else if snapshot.phase == PomodoroPhase::Focus {
+        let todo = state.todo_service.begin_focus()?;
+        emit_todo(&app, &todo, false);
+    }
+    Ok(snapshot)
 }
 
 #[tauri::command]
 pub fn stop_timer(app: AppHandle, state: State<'_, AppState>) -> Result<TimerState, String> {
-    dispatch_timer(&app, &state, PomodoroEvent::Stop)
+    let snapshot = dispatch_timer(&app, &state, PomodoroEvent::Stop)?;
+    let todo = state.todo_service.cancel_focus()?;
+    emit_todo(&app, &todo, false);
+    Ok(snapshot)
 }
 
 #[tauri::command]
@@ -224,7 +342,7 @@ pub fn emergency_stop(app: AppHandle, state: State<'_, AppState>) -> Result<(), 
     state.emergency_stopped.store(true, Ordering::SeqCst);
     let _ = state.foreground_monitor.cancel_all()?;
     let _ = dispatch_timer(&app, &state, PomodoroEvent::Pause)?;
-    for label in ["pet", "card", "gamcha-notice", "gamcha"] {
+    for label in ["pet", "card", "gamcha-notice", "gamcha", "photo-delivery"] {
         if let Some(window) = app.get_webview_window(label) {
             let _ = window.hide();
         }
@@ -236,10 +354,139 @@ pub fn emergency_stop(app: AppHandle, state: State<'_, AppState>) -> Result<(), 
 #[tauri::command]
 pub fn resume_pet(app: AppHandle, state: State<'_, AppState>) -> Result<(), String> {
     state.emergency_stopped.store(false, Ordering::SeqCst);
+    if let Some(delivery) = app.get_webview_window("photo-delivery") {
+        let _ = delivery.emit("photo://reset", ());
+        let _ = delivery.hide();
+    }
     if let Some(window) = app.get_webview_window("pet") {
         window
             .show()
             .map_err(|_| "pet window could not be shown".to_owned())?;
+    }
+    Ok(())
+}
+
+fn prepare_photo_delivery_overlay(app: &AppHandle) -> Result<(), String> {
+    let pet = app
+        .get_webview_window("pet")
+        .ok_or_else(|| "pet window is unavailable".to_owned())?;
+    let delivery = app
+        .get_webview_window("photo-delivery")
+        .ok_or_else(|| "photo delivery window is unavailable".to_owned())?;
+    let monitor = pet
+        .current_monitor()
+        .map_err(|_| "pet monitor is unavailable".to_owned())?
+        .ok_or_else(|| "pet monitor is unavailable".to_owned())?;
+    let work_area = monitor.work_area();
+    delivery
+        .set_position(work_area.position)
+        .map_err(|_| "photo delivery monitor could not be selected".to_owned())?;
+    delivery
+        .set_size(work_area.size)
+        .map_err(|_| "photo delivery overlay could not fit the work area".to_owned())?;
+    delivery
+        .set_ignore_cursor_events(true)
+        .map_err(|_| "photo delivery overlay could not pass pointer input".to_owned())
+}
+
+#[tauri::command]
+pub fn start_photo_delivery(app: AppHandle, state: State<'_, AppState>) -> Result<bool, String> {
+    if state.emergency_stopped.load(Ordering::SeqCst) {
+        return Ok(false);
+    }
+    let timer = dispatch_timer(&app, &state, PomodoroEvent::Tick)?;
+    if timer.phase != PomodoroPhase::Stopped {
+        return Ok(false);
+    }
+    let delivery = app
+        .get_webview_window("photo-delivery")
+        .ok_or_else(|| "photo delivery window is unavailable".to_owned())?;
+    if delivery
+        .is_visible()
+        .map_err(|_| "photo delivery visibility is unavailable".to_owned())?
+    {
+        return Ok(false);
+    }
+    prepare_photo_delivery_overlay(&app)?;
+    if let Some(pet) = app.get_webview_window("pet") {
+        let _ = pet.hide();
+    }
+    delivery
+        .show()
+        .map_err(|_| "photo delivery could not be shown".to_owned())?;
+    if delivery.emit("photo://deliver", ()).is_err() {
+        let _ = delivery.hide();
+        if let Some(pet) = app.get_webview_window("pet") {
+            let _ = pet.show();
+        }
+        return Err("photo delivery could not be started".to_owned());
+    }
+    Ok(true)
+}
+
+#[tauri::command]
+pub fn settle_photo_delivery(
+    app: AppHandle,
+    state: State<'_, AppState>,
+    left: f64,
+    top: f64,
+    width: f64,
+    height: f64,
+) -> Result<(), String> {
+    let delivery = app
+        .get_webview_window("photo-delivery")
+        .ok_or_else(|| "photo delivery window is unavailable".to_owned())?;
+    let pet = app
+        .get_webview_window("pet")
+        .ok_or_else(|| "pet window is unavailable".to_owned())?;
+    let monitor = delivery
+        .current_monitor()
+        .map_err(|_| "photo delivery monitor is unavailable".to_owned())?
+        .ok_or_else(|| "photo delivery monitor is unavailable".to_owned())?;
+    let work_area = monitor.work_area();
+    let scale = delivery
+        .scale_factor()
+        .map_err(|_| "photo delivery scale is unavailable".to_owned())?;
+    let logical_work_width = work_area.size.width as f64 / scale;
+    let logical_work_height = work_area.size.height as f64 / scale;
+    let width = width.clamp(240.0, logical_work_width.min(720.0));
+    let height = height.clamp(180.0, logical_work_height.min(620.0));
+    let left = left.clamp(0.0, (logical_work_width - width).max(0.0));
+    let top = top.clamp(0.0, (logical_work_height - height).max(0.0));
+    let physical_width = (width * scale).round() as u32;
+    let physical_height = (height * scale).round() as u32;
+    let x = work_area.position.x + (left * scale).round() as i32;
+    let y = work_area.position.y + (top * scale).round() as i32;
+    delivery
+        .set_size(tauri::PhysicalSize::new(physical_width, physical_height))
+        .map_err(|_| "delivered photo could not be resized".to_owned())?;
+    delivery
+        .set_position(tauri::PhysicalPosition::new(x, y))
+        .map_err(|_| "delivered photo could not be positioned".to_owned())?;
+    delivery
+        .set_ignore_cursor_events(false)
+        .map_err(|_| "delivered photo could not receive pointer input".to_owned())?;
+    if !state.emergency_stopped.load(Ordering::SeqCst) {
+        pet.show()
+            .map_err(|_| "pet window could not be restored".to_owned())?;
+    }
+    delivery
+        .emit("photo://settled", ())
+        .map_err(|_| "delivered photo could not be settled".to_owned())
+}
+
+#[tauri::command]
+pub fn finish_photo_delivery(app: AppHandle, state: State<'_, AppState>) -> Result<(), String> {
+    if let Some(delivery) = app.get_webview_window("photo-delivery") {
+        delivery
+            .hide()
+            .map_err(|_| "photo delivery could not be hidden".to_owned())?;
+    }
+    if !state.emergency_stopped.load(Ordering::SeqCst) {
+        if let Some(pet) = app.get_webview_window("pet") {
+            pet.show()
+                .map_err(|_| "pet window could not be restored".to_owned())?;
+        }
     }
     Ok(())
 }
@@ -386,22 +633,23 @@ fn prepare_gamcha_overlay(app: &AppHandle) -> Result<(), String> {
         .current_monitor()
         .map_err(|_| "pet monitor is unavailable".to_owned())?
         .ok_or_else(|| "pet monitor is unavailable".to_owned())?;
+    let work_area = monitor.work_area();
     gamcha
         .set_fullscreen(false)
         .map_err(|_| "GAMCHA overlay could not be reset".to_owned())?;
     gamcha
-        .set_position(*monitor.position())
+        .set_position(work_area.position)
         .map_err(|_| "GAMCHA monitor could not be selected".to_owned())?;
     gamcha
-        .set_size(*monitor.size())
-        .map_err(|_| "GAMCHA overlay could not fit the monitor".to_owned())
+        .set_size(work_area.size)
+        .map_err(|_| "GAMCHA overlay could not fit the work area".to_owned())
 }
 
 #[tauri::command]
 pub fn show_utility_window(app: AppHandle, label: String) -> Result<(), String> {
     if !matches!(
         label.as_str(),
-        "timer" | "settings" | "gamcha" | "gamcha-notice" | "pet-menu"
+        "timer" | "todo" | "settings" | "gamcha" | "gamcha-notice" | "pet-menu"
     ) {
         return Err("unsupported utility window".to_owned());
     }
@@ -430,7 +678,7 @@ pub fn show_utility_window(app: AppHandle, label: String) -> Result<(), String> 
 pub fn hide_utility_window(app: AppHandle, label: String) -> Result<(), String> {
     if !matches!(
         label.as_str(),
-        "timer" | "settings" | "gamcha" | "gamcha-notice" | "pet-menu"
+        "timer" | "todo" | "settings" | "gamcha" | "gamcha-notice" | "pet-menu"
     ) {
         return Err("unsupported utility window".to_owned());
     }

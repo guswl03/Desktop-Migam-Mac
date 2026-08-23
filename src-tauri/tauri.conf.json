@@ -53,6 +53,16 @@
         "resizable": false
       },
       {
+        "label": "todo",
+        "title": "감자봇 할 일",
+        "width": 460,
+        "height": 640,
+        "minWidth": 380,
+        "minHeight": 480,
+        "visible": false,
+        "resizable": true
+      },
+      {
         "label": "settings",
         "title": "Desktop Pet Settings",
         "width": 720,
@@ -90,13 +100,28 @@
         "label": "pet-menu",
         "title": "Desktop Pet Command",
         "width": 292,
-        "height": 430,
+        "height": 490,
         "visible": false,
         "decorations": false,
         "alwaysOnTop": true,
         "skipTaskbar": true,
         "shadow": true,
         "resizable": false
+      },
+      {
+        "label": "photo-delivery",
+        "title": "Gamza Photo Delivery",
+        "width": 640,
+        "height": 360,
+        "visible": false,
+        "decorations": false,
+        "transparent": true,
+        "alwaysOnTop": true,
+        "skipTaskbar": true,
+        "focus": false,
+        "focusable": false,
+        "resizable": false,
+        "shadow": false
       }
     ],
     "security": {

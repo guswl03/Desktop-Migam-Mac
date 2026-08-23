@@ -15,9 +15,12 @@ import { costumeById } from "./costumes/catalog";
 import { resolveCostumeAlignment, type CostumeAlignment } from "./costumes/alignment";
 import { attachPetContextMenu } from "./pet/context-menu";
 import { mountPetContextMenu } from "./pet/context-menu-view";
+import { mountPhotoDelivery, startPhotoDeliveryScheduler } from "./pet/photo-delivery-view";
 import { startPetMotion } from "./pet/tauri-motion-runtime";
 import { createPetSprite } from "./pet/sprite";
 import { mountTimer } from "./timer/timer-view";
+import { mountTodo } from "./todo/todo-view";
+import { invokeWhenReady } from "./tauri/invoke-when-ready";
 import "./styles.css";
 
 const app = document.querySelector<HTMLDivElement>("#app");
@@ -52,7 +55,7 @@ function renderPet(): void {
         alignment: resolveCostumeAlignment(costume.slot, snapshot.costumeAlignments[costume.id]),
       } : null);
     };
-    void invoke<CostumeSnapshot>("get_gamcha_state")
+    void invokeWhenReady<CostumeSnapshot>("get_gamcha_state")
       .then(applyCostume)
       .catch(() => sprite.setCostume(null));
     void listen<CostumeSnapshot>("gamcha://equipped", ({ payload }) =>
@@ -60,6 +63,8 @@ function renderPet(): void {
     ).then((unlisten) => window.addEventListener("pagehide", unlisten, { once: true }));
     const stopMotion = startPetMotion(sprite);
     window.addEventListener("pagehide", stopMotion, { once: true });
+    const stopPhotoDeliveryScheduler = startPhotoDeliveryScheduler();
+    window.addEventListener("pagehide", stopPhotoDeliveryScheduler, { once: true });
     void attachPetContextMenu(sprite.element).then((cleanup) => {
       window.addEventListener("pagehide", cleanup, { once: true });
     });
@@ -310,6 +315,12 @@ async function start(): Promise<void> {
     renderTimer();
     return;
   }
+  if (windowLabel === "todo") {
+    void mountTodo(app!).then((cleanup) => {
+      window.addEventListener("pagehide", cleanup, { once: true });
+    });
+    return;
+  }
   if (windowLabel === "gamcha") {
     renderGamcha();
     return;
@@ -324,15 +335,31 @@ async function start(): Promise<void> {
     });
     return;
   }
+  if (windowLabel === "photo-delivery") {
+    void mountPhotoDelivery(app!).then((cleanup) => {
+      window.addEventListener("pagehide", cleanup, { once: true });
+    });
+    return;
+  }
+  let bootstrap: BootstrapState;
   try {
-    const bootstrap = await invoke<BootstrapState>("get_bootstrap_state");
+    bootstrap = await invokeWhenReady<BootstrapState>("get_bootstrap_state");
+  } catch (error) {
+    const detail = error instanceof Error ? error.message : String(error);
+    console.error("Failed to load desktop pet settings", error);
+    app!.innerHTML = `<main class="panel"><h1>설정을 불러오지 못했습니다.</h1><p class="muted">설정 데이터 요청 실패: ${escaped(detail)}</p></main>`;
+    return;
+  }
+  try {
     renderSettings(
       bootstrap.settings,
       bootstrap.emergencyShortcutAvailable,
       bootstrap.trayAvailable,
     );
-  } catch {
-    app!.innerHTML = `<main class="panel"><h1>설정을 불러오지 못했습니다.</h1><p class="muted">앱을 다시 시작해 주세요.</p></main>`;
+  } catch (error) {
+    const detail = error instanceof Error ? error.message : String(error);
+    console.error("Failed to render desktop pet settings", error);
+    app!.innerHTML = `<main class="panel"><h1>설정을 불러오지 못했습니다.</h1><p class="muted">설정 화면 생성 실패: ${escaped(detail)}</p></main>`;
   }
 }
 

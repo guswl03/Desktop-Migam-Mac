@@ -10,6 +10,7 @@ Windows 11용 Tauri 2 데스크톱 펫 MVP를 **코드, 프로젝트, 디자인 
 4. [06-ai-agent-work-orders.md](./06-ai-agent-work-orders.md) — AI에게 단계별로 줄 작업 지시
 5. [13-progress-board.md](./13-progress-board.md) — 진행 상태 기록
 6. [17-session-handoff.md](./17-session-handoff.md) — 다음 세션이 이어서 작업하기 위한 최신 인수인계
+7. [18-todo-pomodoro-spec.md](./18-todo-pomodoro-spec.md) — 다음 추가 기능인 투두리스트·뽀모도로 연동 확정 명세
 
 ## 문서 지도
 
@@ -33,6 +34,7 @@ Windows 11용 Tauri 2 데스크톱 펫 MVP를 **코드, 프로젝트, 디자인 
 | `15-troubleshooting.md` | 자주 막히는 문제와 대응 |
 | `16-definition-of-done.md` | 최종 완료 판정표 |
 | `17-session-handoff.md` | 최신 구현 상태, 검증 결과와 정확한 다음 작업 |
+| `18-todo-pomodoro-spec.md` | 투두 CRUD, 집중 연결, 전체 완료 축하와 구현 게이트 |
 
 ## AI 작업 규칙
 

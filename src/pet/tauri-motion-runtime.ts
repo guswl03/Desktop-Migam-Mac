@@ -142,6 +142,8 @@ export function startPetMotion(sprite: PetSprite): () => void {
   let interactionId = 0;
   let timerActive = false;
   let unlistenTimer: (() => void) | null = null;
+  let unlistenTodo: (() => void) | null = null;
+  let celebrationTimer: number | undefined;
   let resourceSpeedMultiplier = 1;
   let latestSystemMetrics: SystemMetricsState = {
     cpuPercent: 0,
@@ -456,6 +458,21 @@ export function startPetMotion(sprite: PetSprite): () => void {
       else unlisten();
     },
   );
+  void listen("todo://all-completed", () => {
+    interactionId += 1;
+    sprite.element.classList.add("todo-celebrating");
+    setMode({ kind: "timer", phase: "shortBreak" }, "jumping");
+    window.clearTimeout(celebrationTimer);
+    celebrationTimer = window.setTimeout(() => {
+      sprite.element.classList.remove("todo-celebrating");
+      void invoke<TimerSnapshot>("get_timer_state").then(applyTimerState).catch(() => {
+        setMode(idleMode(), "idle");
+      });
+    }, 4_500);
+  }).then((unlisten) => {
+    if (active) unlistenTodo = unlisten;
+    else unlisten();
+  });
   pollSystemMetrics();
   const systemMetricsTimer = window.setInterval(pollSystemMetrics, 1_000);
 
@@ -469,6 +486,8 @@ export function startPetMotion(sprite: PetSprite): () => void {
     interactionId += 1;
     window.clearInterval(animationTimer);
     window.clearInterval(systemMetricsTimer);
+    window.clearTimeout(celebrationTimer);
     unlistenTimer?.();
+    unlistenTodo?.();
   };
 }
