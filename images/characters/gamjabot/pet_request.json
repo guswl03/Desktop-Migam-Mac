@@ -1,0 +1,352 @@
+{
+  "pet_id": "gamjabot",
+  "display_name": "Gamjabot",
+  "description": "\ud070 \ube44\ub300\uce6d \ub208\uacfc \ub3d9\uadf8\ub780 \uc785\uc744 \uc9c0\ub2cc \ud751\ubc31 \ud53d\uc140 \uc791\uc5c5 \ub3c4\uc6b0\ubbf8.",
+  "created_at": "2026-08-22T14:56:20.852963+00:00",
+  "sprite_version_number": 2,
+  "atlas": {
+    "columns": 8,
+    "rows": 11,
+    "cell_width": 192,
+    "cell_height": 208,
+    "width": 1536,
+    "height": 2288
+  },
+  "rows": [
+    {
+      "state": "idle",
+      "row": 0,
+      "frames": 6,
+      "purpose": "calm resting, breathing, and blinking loop"
+    },
+    {
+      "state": "running-right",
+      "row": 1,
+      "frames": 8,
+      "purpose": "rightward drag movement loop"
+    },
+    {
+      "state": "running-left",
+      "row": 2,
+      "frames": 8,
+      "purpose": "leftward drag movement loop"
+    },
+    {
+      "state": "waving",
+      "row": 3,
+      "frames": 4,
+      "purpose": "greeting or attention gesture"
+    },
+    {
+      "state": "jumping",
+      "row": 4,
+      "frames": 5,
+      "purpose": "hover or playful jump"
+    },
+    {
+      "state": "failed",
+      "row": 5,
+      "frames": 8,
+      "purpose": "blocked, failed, or cancelled reaction"
+    },
+    {
+      "state": "waiting",
+      "row": 6,
+      "frames": 6,
+      "purpose": "waiting for approval, help, or user input"
+    },
+    {
+      "state": "running",
+      "row": 7,
+      "frames": 6,
+      "purpose": "active task work or processing"
+    },
+    {
+      "state": "review",
+      "row": 8,
+      "frames": 6,
+      "purpose": "ready or completed output review"
+    },
+    {
+      "state": "look-row-9",
+      "row": 9,
+      "frames": 8,
+      "directions": [
+        "000",
+        "022.5",
+        "045",
+        "067.5",
+        "090",
+        "112.5",
+        "135",
+        "157.5"
+      ],
+      "purpose": "clockwise look directions from up through down-right"
+    },
+    {
+      "state": "look-row-10",
+      "row": 10,
+      "frames": 8,
+      "directions": [
+        "180",
+        "202.5",
+        "225",
+        "247.5",
+        "270",
+        "292.5",
+        "315",
+        "337.5"
+      ],
+      "purpose": "clockwise look directions from down through up-left"
+    }
+  ],
+  "layout_guides": [
+    {
+      "state": "idle",
+      "path": "references\\layout-guides\\idle.png",
+      "width": 1152,
+      "height": 208,
+      "frames": 6,
+      "cell_width": 192,
+      "cell_height": 208,
+      "safe_margin_x": 18,
+      "safe_margin_y": 16,
+      "usage": "layout guide input only; do not copy visible guide lines into generated sprite strips"
+    },
+    {
+      "state": "running-right",
+      "path": "references\\layout-guides\\running-right.png",
+      "width": 1536,
+      "height": 208,
+      "frames": 8,
+      "cell_width": 192,
+      "cell_height": 208,
+      "safe_margin_x": 18,
+      "safe_margin_y": 16,
+      "usage": "layout guide input only; do not copy visible guide lines into generated sprite strips"
+    },
+    {
+      "state": "running-left",
+      "path": "references\\layout-guides\\running-left.png",
+      "width": 1536,
+      "height": 208,
+      "frames": 8,
+      "cell_width": 192,
+      "cell_height": 208,
+      "safe_margin_x": 18,
+      "safe_margin_y": 16,
+      "usage": "layout guide input only; do not copy visible guide lines into generated sprite strips"
+    },
+    {
+      "state": "waving",
+      "path": "references\\layout-guides\\waving.png",
+      "width": 768,
+      "height": 208,
+      "frames": 4,
+      "cell_width": 192,
+      "cell_height": 208,
+      "safe_margin_x": 18,
+      "safe_margin_y": 16,
+      "usage": "layout guide input only; do not copy visible guide lines into generated sprite strips"
+    },
+    {
+      "state": "jumping",
+      "path": "references\\layout-guides\\jumping.png",
+      "width": 960,
+      "height": 208,
+      "frames": 5,
+      "cell_width": 192,
+      "cell_height": 208,
+      "safe_margin_x": 18,
+      "safe_margin_y": 16,
+      "usage": "layout guide input only; do not copy visible guide lines into generated sprite strips"
+    },
+    {
+      "state": "failed",
+      "path": "references\\layout-guides\\failed.png",
+      "width": 1536,
+      "height": 208,
+      "frames": 8,
+      "cell_width": 192,
+      "cell_height": 208,
+      "safe_margin_x": 18,
+      "safe_margin_y": 16,
+      "usage": "layout guide input only; do not copy visible guide lines into generated sprite strips"
+    },
+    {
+      "state": "waiting",
+      "path": "references\\layout-guides\\waiting.png",
+      "width": 1152,
+      "height": 208,
+      "frames": 6,
+      "cell_width": 192,
+      "cell_height": 208,
+      "safe_margin_x": 18,
+      "safe_margin_y": 16,
+      "usage": "layout guide input only; do not copy visible guide lines into generated sprite strips"
+    },
+    {
+      "state": "running",
+      "path": "references\\layout-guides\\running.png",
+      "width": 1152,
+      "height": 208,
+      "frames": 6,
+      "cell_width": 192,
+      "cell_height": 208,
+      "safe_margin_x": 18,
+      "safe_margin_y": 16,
+      "usage": "layout guide input only; do not copy visible guide lines into generated sprite strips"
+    },
+    {
+      "state": "review",
+      "path": "references\\layout-guides\\review.png",
+      "width": 1152,
+      "height": 208,
+      "frames": 6,
+      "cell_width": 192,
+      "cell_height": 208,
+      "safe_margin_x": 18,
+      "safe_margin_y": 16,
+      "usage": "layout guide input only; do not copy visible guide lines into generated sprite strips"
+    },
+    {
+      "state": "look-row-9",
+      "path": "references\\layout-guides\\look-row-9.png",
+      "width": 1536,
+      "height": 208,
+      "frames": 8,
+      "cell_width": 192,
+      "cell_height": 208,
+      "safe_margin_x": 18,
+      "safe_margin_y": 16,
+      "usage": "layout guide input only; do not copy visible guide lines into generated sprite strips"
+    },
+    {
+      "state": "look-row-10",
+      "path": "references\\layout-guides\\look-row-10.png",
+      "width": 1536,
+      "height": 208,
+      "frames": 8,
+      "cell_width": 192,
+      "cell_height": 208,
+      "safe_margin_x": 18,
+      "safe_margin_y": 16,
+      "usage": "layout guide input only; do not copy visible guide lines into generated sprite strips"
+    },
+    {
+      "state": "look-cardinals",
+      "path": "references\\layout-guides\\look-cardinals.png",
+      "width": 768,
+      "height": 208,
+      "frames": 4,
+      "cell_width": 192,
+      "cell_height": 208,
+      "safe_margin_x": 18,
+      "safe_margin_y": 16,
+      "usage": "layout guide input only; do not copy visible guide lines into generated sprite strips"
+    }
+  ],
+  "references": [
+    {
+      "path": "images/characters/gamjabot\\references\\reference-01.png",
+      "width": 1254,
+      "height": 1254,
+      "mode": "RGBA",
+      "format": "PNG",
+      "source_path": "%USERPROFILE%\\Desktop\\BOB15th\\\uac10\uc790\uc2a4\ud2f0\ucee4\\\ud0d1\ud150\uac10\uc790_4.png",
+      "copied_path": "images/characters/gamjabot\\references\\reference-01.png"
+    },
+    {
+      "path": "images/characters/gamjabot\\references\\reference-02.png",
+      "width": 1536,
+      "height": 1024,
+      "mode": "RGBA",
+      "format": "PNG",
+      "source_path": "%USERPROFILE%\\Desktop\\BOB15th\\\uac10\uc790\uc2a4\ud2f0\ucee4\\trophy-character-cutout.png",
+      "copied_path": "images/characters/gamjabot\\references\\reference-02.png"
+    },
+    {
+      "path": "images/characters/gamjabot\\references\\reference-03.png",
+      "width": 402,
+      "height": 402,
+      "mode": "RGBA",
+      "format": "PNG",
+      "source_path": "%USERPROFILE%\\Desktop\\BOB15th\\\uac10\uc790\uc2a4\ud2f0\ucee4\\\ub9cc\uc871\uac10\uc790_\uace0\ud654\uc9c8_\ub204\ub07c_34x34mm.png",
+      "copied_path": "images/characters/gamjabot\\references\\reference-03.png"
+    },
+    {
+      "path": "images/characters/gamjabot\\references\\reference-04.png",
+      "width": 1053,
+      "height": 1493,
+      "mode": "RGBA",
+      "format": "PNG",
+      "source_path": "%USERPROFILE%\\Desktop\\BOB15th\\\uac10\uc790\uc2a4\ud2f0\ucee4\\\uac1c\uad6c\ub9ac\uac10\uc790_3.png",
+      "copied_path": "images/characters/gamjabot\\references\\reference-04.png"
+    },
+    {
+      "path": "images/characters/gamjabot\\references\\reference-05.png",
+      "width": 981,
+      "height": 1019,
+      "mode": "RGBA",
+      "format": "PNG",
+      "source_path": "%USERPROFILE%\\Desktop\\BOB15th\\\uac10\uc790\uc2a4\ud2f0\ucee4\\\ubbf8\uac101.png",
+      "copied_path": "images/characters/gamjabot\\references\\reference-05.png"
+    },
+    {
+      "path": "images/characters/gamjabot\\references\\reference-06.png",
+      "width": 969,
+      "height": 1031,
+      "mode": "RGBA",
+      "format": "PNG",
+      "source_path": "%USERPROFILE%\\Desktop\\BOB15th\\\uac10\uc790\uc2a4\ud2f0\ucee4\\\ubbf8\uac104_4.png",
+      "copied_path": "images/characters/gamjabot\\references\\reference-06.png"
+    },
+    {
+      "path": "images/characters/gamjabot\\references\\reference-07.png",
+      "width": 220,
+      "height": 257,
+      "mode": "RGBA",
+      "format": "PNG",
+      "source_path": "%USERPROFILE%\\Desktop\\BOB15th\\\uac10\uc790\uc2a4\ud2f0\ucee4\\\ubbf8\uac109_6.png",
+      "copied_path": "images/characters/gamjabot\\references\\reference-07.png"
+    },
+    {
+      "path": "images/characters/gamjabot\\references\\reference-08.png",
+      "width": 1263,
+      "height": 791,
+      "mode": "RGBA",
+      "format": "PNG",
+      "source_path": "%USERPROFILE%\\Desktop\\BOB15th\\\uac10\uc790\uc2a4\ud2f0\ucee4\\\ubbf8\uac105_7.png",
+      "copied_path": "images/characters/gamjabot\\references\\reference-08.png"
+    },
+    {
+      "path": "images/characters/gamjabot\\references\\reference-09.png",
+      "width": 1304,
+      "height": 766,
+      "mode": "RGBA",
+      "format": "PNG",
+      "source_path": "%USERPROFILE%\\Desktop\\BOB15th\\\uac10\uc790\uc2a4\ud2f0\ucee4\\\ubbf8\uac108_3.png",
+      "copied_path": "images/characters/gamjabot\\references\\reference-09.png"
+    }
+  ],
+  "chroma_key": {
+    "hex": "#00FFFF",
+    "rgb": [
+      0,
+      255,
+      255
+    ],
+    "name": "cyan",
+    "selection": "auto",
+    "score": 208.32
+  },
+  "pet_notes": "\uc6d0\uc791 \uac10\uc790 \uce90\ub9ad\ud130\uc5d0 \ucda9\uc2e4\ud55c \uc21c\uc218 \ud751\ubc31 \ud53d\uc140 \ud3ab. \ub9e4\uc6b0 \ud070 \ube44\ub300\uce6d \ud770 \ub208, \uc791\uc740 \uac80\uc740 \uc810\ub3d9\uacf5, \uc544\ub798\ucabd\uc758 \uad75\uc740 \uc6d0\ud615 O\uc790 \uc785, \ub465\uadfc \ud770 \uba38\ub9ac\uc640 \uac00\ub290\ub2e4\ub780 \uac80\uc740 \ud314\ub2e4\ub9ac. \uae30\ubcf8 \ubcf8\uccb4\uc5d0\ub294 \ubaa8\uc790, \ud2b8\ub85c\ud53c, \uc18c\ud488, \uc0c9\uc0c1, \ud14d\uc2a4\ud2b8\uac00 \uc804\ud600 \uc5c6\uc5b4\uc57c \ud55c\ub2e4. \ud5a5\ud6c4 \ubcc4\ub3c4 \uc561\uc138\uc11c\ub9ac \uc624\ubc84\ub808\uc774\ub97c \uc704\ud574 \uba38\ub9ac \uc678\uacfd\uacfc \uc190 \uc8fc\ubcc0\uc744 \ub2e8\uc21c\ud558\uace0 \ube44\uc6cc \ub454\ub2e4.",
+  "style_preset": "pixel",
+  "style_notes": "crisp authentic pixel art, strict black and white only, no grayscale antialiasing, chunky readable pixels, transparent-ready silhouette, preserve the awkward lovable hand-drawn expression",
+  "style_contract": "Pet-safe sprite: compact full-body mascot, readable in a 192x208 cell, clear silhouette, simple face, stable palette/materials, and crisp edges for chroma-key extraction. Style `pixel`: Pixel-art-adjacent digital mascot with a chunky silhouette, simple dark outline, limited palette, flat cel shading, and visible stepped edges. User style notes: crisp authentic pixel art, strict black and white only, no grayscale antialiasing, chunky readable pixels, transparent-ready silhouette, preserve the awkward lovable hand-drawn expression.",
+  "brand_name": "",
+  "brand_brief": "",
+  "brand_sources": [],
+  "pet_safe_style": "Pet-safe sprite: compact full-body mascot, readable in a 192x208 cell, clear silhouette, simple face, stable palette/materials, and crisp edges for chroma-key extraction.",
+  "primary_generation_skill": "$imagegen"
+}

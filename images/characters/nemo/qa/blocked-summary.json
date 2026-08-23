@@ -1,0 +1,10 @@
+{
+  "ok": true,
+  "stage": "awaiting-blind-visual-qa",
+  "spritesheet": "images/characters/nemo\\final\\spritesheet-extended.webp",
+  "validation": "images/characters/nemo\\final\\validation-extended.json",
+  "contact_sheet": "images/characters/nemo\\qa\\contact-sheet-extended.png",
+  "direction_sheet": "images/characters/nemo\\qa\\look-directions.png",
+  "continuity": "images/characters/nemo\\qa\\look-continuity.json",
+  "blocker": "Windows sandbox view_image apply deny-read ACLs"
+}

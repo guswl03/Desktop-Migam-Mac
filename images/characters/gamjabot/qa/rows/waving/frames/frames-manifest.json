@@ -1,0 +1,24 @@
+{
+  "ok": true,
+  "chroma_key": {
+    "hex": "#00FFFF",
+    "rgb": [
+      0,
+      255,
+      255
+    ],
+    "threshold": 96.0
+  },
+  "rows": [
+    {
+      "state": "waving",
+      "frames": [
+        "images/characters/gamjabot\\qa\\rows\\waving\\frames\\waving\\00.png",
+        "images/characters/gamjabot\\qa\\rows\\waving\\frames\\waving\\01.png",
+        "images/characters/gamjabot\\qa\\rows\\waving\\frames\\waving\\02.png",
+        "images/characters/gamjabot\\qa\\rows\\waving\\frames\\waving\\03.png"
+      ],
+      "method": "components"
+    }
+  ]
+}

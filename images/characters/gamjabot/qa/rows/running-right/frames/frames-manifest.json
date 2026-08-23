@@ -1,0 +1,28 @@
+{
+  "ok": true,
+  "chroma_key": {
+    "hex": "#00FFFF",
+    "rgb": [
+      0,
+      255,
+      255
+    ],
+    "threshold": 96.0
+  },
+  "rows": [
+    {
+      "state": "running-right",
+      "frames": [
+        "images/characters/gamjabot\\qa\\rows\\running-right\\frames\\running-right\\00.png",
+        "images/characters/gamjabot\\qa\\rows\\running-right\\frames\\running-right\\01.png",
+        "images/characters/gamjabot\\qa\\rows\\running-right\\frames\\running-right\\02.png",
+        "images/characters/gamjabot\\qa\\rows\\running-right\\frames\\running-right\\03.png",
+        "images/characters/gamjabot\\qa\\rows\\running-right\\frames\\running-right\\04.png",
+        "images/characters/gamjabot\\qa\\rows\\running-right\\frames\\running-right\\05.png",
+        "images/characters/gamjabot\\qa\\rows\\running-right\\frames\\running-right\\06.png",
+        "images/characters/gamjabot\\qa\\rows\\running-right\\frames\\running-right\\07.png"
+      ],
+      "method": "components"
+    }
+  ]
+}

@@ -1,0 +1,9 @@
+{
+  "ok": true,
+  "stage": "awaiting-blind-visual-qa",
+  "deterministic_validation": "images/characters/gamjabot\\final\\validation-extended.json",
+  "spritesheet": "images/characters/gamjabot\\final\\spritesheet-extended.webp",
+  "contact_sheet": "images/characters/gamjabot\\qa\\contact-sheet-extended.png",
+  "direction_sheet": "images/characters/gamjabot\\qa\\look-directions.png",
+  "blocker": "Windows sandbox view_image apply deny-read ACLs for all three isolated reviewers"
+}

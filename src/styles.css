@@ -1,0 +1,28 @@
+:root {
+  color: #f6f7fb;
+  background: transparent;
+  font-family: "Segoe UI", sans-serif;
+}
+
+html,
+body,
+#app,
+.pet-shell {
+  width: 100%;
+  height: 100%;
+  margin: 0;
+  overflow: hidden;
+  background: transparent;
+}
+
+.pet-shell {
+  display: grid;
+  place-items: center;
+}
+
+.pet-placeholder {
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+  user-select: none;
+}
