@@ -2,6 +2,6 @@
   "$schema": "../gen/schemas/desktop-schema.json",
   "identifier": "default",
   "description": "Base capability for the desktop pet windows.",
-  "windows": ["pet", "card", "timer", "settings", "gamcha-notice", "gamcha"],
+  "windows": ["pet", "card", "timer", "settings", "gamcha-notice", "gamcha", "pet-menu"],
   "permissions": ["core:default"]
 }

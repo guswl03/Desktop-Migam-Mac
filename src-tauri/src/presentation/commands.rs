@@ -12,7 +12,7 @@ use crate::{
     },
     domain::{
         pomodoro::{PomodoroEvent, PomodoroPhase},
-        settings::Settings,
+        settings::{ResourceResponseMode, Settings},
     },
 };
 
@@ -41,7 +41,11 @@ pub fn get_bootstrap_state(state: State<'_, AppState>) -> Result<BootstrapState,
 }
 
 #[tauri::command]
-pub fn save_settings(state: State<'_, AppState>, settings: Settings) -> Result<Settings, String> {
+pub fn save_settings(
+    app: AppHandle,
+    state: State<'_, AppState>,
+    settings: Settings,
+) -> Result<Settings, String> {
     let normalized = settings.validate().map_err(|error| error.to_string())?;
     state.settings_service.save(&normalized)?;
     state
@@ -51,7 +55,32 @@ pub fn save_settings(state: State<'_, AppState>, settings: Settings) -> Result<S
         .settings
         .write()
         .map_err(|_| "settings state is unavailable".to_owned())? = normalized.clone();
+    let _ = app.emit("settings://saved", &normalized);
     Ok(normalized)
+}
+
+#[derive(Serialize)]
+#[serde(rename_all = "camelCase")]
+pub struct SystemMetricsState {
+    cpu_percent: u8,
+    memory_percent: u8,
+    mode: ResourceResponseMode,
+}
+
+#[tauri::command]
+pub fn get_system_metrics(state: State<'_, AppState>) -> Result<SystemMetricsState, String> {
+    let metrics = state.system_metrics_monitor.poll()?;
+    let mode = state
+        .settings
+        .read()
+        .map_err(|_| "settings state is unavailable".to_owned())?
+        .pet
+        .resource_response_mode;
+    Ok(SystemMetricsState {
+        cpu_percent: metrics.cpu_percent,
+        memory_percent: metrics.memory_percent,
+        mode,
+    })
 }
 
 fn dispatch_timer(
@@ -304,6 +333,48 @@ pub fn position_gamcha_bubble(app: AppHandle) -> Result<(), String> {
     place_gamcha_notice_bubble(&app)
 }
 
+#[tauri::command]
+pub fn show_pet_context_menu(app: AppHandle, x: i32, y: i32) -> Result<(), String> {
+    let pet = app
+        .get_webview_window("pet")
+        .ok_or_else(|| "pet window is unavailable".to_owned())?;
+    let menu = app
+        .get_webview_window("pet-menu")
+        .ok_or_else(|| "pet menu is unavailable".to_owned())?;
+    let menu_size = menu
+        .outer_size()
+        .map_err(|_| "pet menu size is unavailable".to_owned())?;
+    let monitor = pet
+        .current_monitor()
+        .map_err(|_| "pet monitor is unavailable".to_owned())?
+        .ok_or_else(|| "pet monitor is unavailable".to_owned())?;
+    let work_area = monitor.work_area();
+    let minimum_x = work_area.position.x;
+    let minimum_y = work_area.position.y;
+    let maximum_x = minimum_x + work_area.size.width as i32 - menu_size.width as i32;
+    let maximum_y = minimum_y + work_area.size.height as i32 - menu_size.height as i32;
+    let desired_x = if x + 10 + menu_size.width as i32 <= minimum_x + work_area.size.width as i32 {
+        x + 10
+    } else {
+        x - menu_size.width as i32 - 10
+    };
+    let desired_y = if y + 10 + menu_size.height as i32 <= minimum_y + work_area.size.height as i32
+    {
+        y + 10
+    } else {
+        y - menu_size.height as i32 - 10
+    };
+    menu.set_position(tauri::PhysicalPosition::new(
+        desired_x.clamp(minimum_x, maximum_x.max(minimum_x)),
+        desired_y.clamp(minimum_y, maximum_y.max(minimum_y)),
+    ))
+    .map_err(|_| "pet menu could not be positioned".to_owned())?;
+    menu.show()
+        .map_err(|_| "pet menu could not be shown".to_owned())?;
+    menu.set_focus()
+        .map_err(|_| "pet menu could not be focused".to_owned())
+}
+
 fn prepare_gamcha_overlay(app: &AppHandle) -> Result<(), String> {
     let pet = app
         .get_webview_window("pet")
@@ -330,7 +401,7 @@ fn prepare_gamcha_overlay(app: &AppHandle) -> Result<(), String> {
 pub fn show_utility_window(app: AppHandle, label: String) -> Result<(), String> {
     if !matches!(
         label.as_str(),
-        "timer" | "settings" | "gamcha" | "gamcha-notice"
+        "timer" | "settings" | "gamcha" | "gamcha-notice" | "pet-menu"
     ) {
         return Err("unsupported utility window".to_owned());
     }
@@ -359,7 +430,7 @@ pub fn show_utility_window(app: AppHandle, label: String) -> Result<(), String> 
 pub fn hide_utility_window(app: AppHandle, label: String) -> Result<(), String> {
     if !matches!(
         label.as_str(),
-        "timer" | "settings" | "gamcha" | "gamcha-notice"
+        "timer" | "settings" | "gamcha" | "gamcha-notice" | "pet-menu"
     ) {
         return Err("unsupported utility window".to_owned());
     }

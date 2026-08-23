@@ -6,12 +6,15 @@ import type {
   DetectionState,
   DistractionRule,
   Settings,
+  SystemMetricsState,
+  ResourceResponseMode,
 } from "./contracts";
 import { mountKick } from "./intervention/kick-view";
 import { mountGamcha, mountGamchaNotice } from "./gamcha/gamcha-view";
 import { costumeById } from "./costumes/catalog";
 import { resolveCostumeAlignment, type CostumeAlignment } from "./costumes/alignment";
 import { attachPetContextMenu } from "./pet/context-menu";
+import { mountPetContextMenu } from "./pet/context-menu-view";
 import { startPetMotion } from "./pet/tauri-motion-runtime";
 import { createPetSprite } from "./pet/sprite";
 import { mountTimer } from "./timer/timer-view";
@@ -180,6 +183,15 @@ function renderSettings(
         <fieldset>
           <legend>펫</legend>
           <label>크기 (%)<input name="visualScalePercent" type="number" min="50" max="200" value="${settings.pet.visualScalePercent}" /></label>
+          <label>시스템 반응 기준
+            <select name="resourceResponseMode">
+              <option value="off" ${settings.pet.resourceResponseMode === "off" ? "selected" : ""}>사용 안 함</option>
+              <option value="cpu" ${settings.pet.resourceResponseMode === "cpu" ? "selected" : ""}>CPU 사용량</option>
+              <option value="memory" ${settings.pet.resourceResponseMode === "memory" ? "selected" : ""}>메모리 사용량</option>
+              <option value="combined" ${settings.pet.resourceResponseMode === "combined" ? "selected" : ""}>CPU와 메모리 중 높은 값</option>
+            </select>
+          </label>
+          <p id="resource-status" class="detection-status" role="status">CPU --% · 메모리 --%</p>
         </fieldset>
         <fieldset>
           <legend>뽀모도로</legend>
@@ -230,6 +242,19 @@ function renderSettings(
     redrawRules();
   });
   const detectionStatus = document.querySelector<HTMLParagraphElement>("#detection-status");
+  const resourceStatus = document.querySelector<HTMLParagraphElement>("#resource-status");
+  const updateResourceStatus = (): void => {
+    void invoke<SystemMetricsState>("get_system_metrics").then((metrics) => {
+      if (resourceStatus) {
+        resourceStatus.textContent = `CPU ${metrics.cpuPercent}% · 메모리 ${metrics.memoryPercent}%`;
+      }
+    }).catch(() => {
+      if (resourceStatus) resourceStatus.textContent = "시스템 사용량을 읽지 못했습니다";
+    });
+  };
+  updateResourceStatus();
+  const resourceStatusTimer = window.setInterval(updateResourceStatus, 1_000);
+  window.addEventListener("pagehide", () => window.clearInterval(resourceStatusTimer), { once: true });
   const showDetection = (detection: DetectionState): void => {
     if (!detectionStatus) return;
     const rule = rules.find((candidate) => candidate.id === detection.ruleId);
@@ -248,7 +273,10 @@ function renderSettings(
     rules = readRules(values, rules);
     const next: Settings = {
       ...settings,
-      pet: { visualScalePercent: numberValue(values, "visualScalePercent") },
+      pet: {
+        visualScalePercent: numberValue(values, "visualScalePercent"),
+        resourceResponseMode: String(values.get("resourceResponseMode")) as ResourceResponseMode,
+      },
       pomodoro: {
         focusMinutes: numberValue(values, "focusMinutes"),
         shortBreakMinutes: numberValue(values, "shortBreakMinutes"),
@@ -288,6 +316,12 @@ async function start(): Promise<void> {
   }
   if (windowLabel === "gamcha-notice") {
     renderGamchaNotice();
+    return;
+  }
+  if (windowLabel === "pet-menu") {
+    void mountPetContextMenu(app!).then((cleanup) => {
+      window.addEventListener("pagehide", cleanup, { once: true });
+    });
     return;
   }
   try {

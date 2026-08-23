@@ -6,7 +6,9 @@ use crate::{
         pomodoro_service::PomodoroService, settings_service::SettingsService,
     },
     domain::settings::Settings,
-    infrastructure::windows::{PlatformForegroundWindowSource, PlatformWindowMinimizer},
+    infrastructure::windows::{
+        PlatformForegroundWindowSource, PlatformWindowMinimizer, SystemMetricsMonitor,
+    },
 };
 
 pub struct AppState {
@@ -15,6 +17,7 @@ pub struct AppState {
     pub pomodoro_service: PomodoroService,
     pub gamcha_service: GamchaService,
     pub foreground_monitor: ForegroundMonitor,
+    pub system_metrics_monitor: SystemMetricsMonitor,
     pub emergency_stopped: AtomicBool,
     pub emergency_shortcut_available: AtomicBool,
     pub tray_available: AtomicBool,
@@ -37,6 +40,7 @@ impl AppState {
                 Box::new(PlatformWindowMinimizer),
                 std::process::id(),
             ),
+            system_metrics_monitor: SystemMetricsMonitor::new(),
             emergency_stopped: AtomicBool::new(false),
             emergency_shortcut_available: AtomicBool::new(false),
             tray_available: AtomicBool::new(false),

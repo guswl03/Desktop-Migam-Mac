@@ -5,6 +5,22 @@ import dragged02 from "../../images/characters/gamjabot/extra/frames/dragged/02.
 import dragged03 from "../../images/characters/gamjabot/extra/frames/dragged/03.png";
 import hardImpact00 from "../../images/characters/gamjabot/extra/frames/hard-impact/00.png";
 import focused00 from "../../images/characters/gamjabot/extra/frames/focused/00.png";
+import alert00 from "../../running/alert/0.png";
+import alert01 from "../../running/alert/1.png";
+import alert02 from "../../running/alert/2.png";
+import alert03 from "../../running/alert/3.png";
+import medium00 from "../../running/medium/0.png";
+import medium01 from "../../running/medium/1.png";
+import medium02 from "../../running/medium/2.png";
+import medium03 from "../../running/medium/3.png";
+import fast00 from "../../running/fast/0.png";
+import fast01 from "../../running/fast/1.png";
+import fast02 from "../../running/fast/2.png";
+import fast03 from "../../running/fast/3.png";
+import extreme00 from "../../running/extreme/0.png";
+import extreme01 from "../../running/extreme/1.png";
+import extreme02 from "../../running/extreme/2.png";
+import extreme03 from "../../running/extreme/3.png";
 import landing00 from "../../images/characters/gamjabot/extra/frames/landing/00.png";
 import landing01 from "../../images/characters/gamjabot/extra/frames/landing/01.png";
 import landing02 from "../../images/characters/gamjabot/extra/frames/landing/02.png";
@@ -22,12 +38,23 @@ export type PetAnimation =
   | "idle"
   | "running-left"
   | "running-right"
+  | "load-alert-left"
+  | "load-alert-right"
+  | "load-medium-left"
+  | "load-medium-right"
+  | "load-fast-left"
+  | "load-fast-right"
+  | "load-extreme-left"
+  | "load-extreme-right"
   | "jumping"
   | "dragged"
   | "thrown"
   | "landing"
   | "hard-impact"
-  | "focused";
+  | "focused"
+  | "waiting"
+  | "busy"
+  | "failed";
 
 const DISPLAY_CELL_WIDTH = 96;
 const DISPLAY_CELL_HEIGHT = 104;
@@ -36,18 +63,36 @@ const DISPLAY_ATLAS_HEIGHT = 1144;
 
 type AnimationDefinition =
   | { source: "atlas"; row: number; frames: number }
-  | { source: "images"; images: string[]; frames: number };
+  | { source: "images"; images: string[]; frames: number; mirror?: boolean; contain?: boolean };
+
+const loadFrames = {
+  alert: [alert00, alert01, alert02, alert03],
+  medium: [medium00, medium01, medium02, medium03],
+  fast: [fast00, fast01, fast02, fast03],
+  extreme: [extreme00, extreme01, extreme02, extreme03],
+};
 
 const animations: Record<PetAnimation, AnimationDefinition> = {
   idle: { source: "atlas", row: 0, frames: 6 },
   "running-right": { source: "atlas", row: 1, frames: 8 },
   "running-left": { source: "atlas", row: 2, frames: 8 },
+  "load-alert-right": { source: "images", images: loadFrames.alert, frames: 4, contain: true },
+  "load-alert-left": { source: "images", images: loadFrames.alert, frames: 4, mirror: true, contain: true },
+  "load-medium-right": { source: "images", images: loadFrames.medium, frames: 4, contain: true },
+  "load-medium-left": { source: "images", images: loadFrames.medium, frames: 4, mirror: true, contain: true },
+  "load-fast-right": { source: "images", images: loadFrames.fast, frames: 4, contain: true },
+  "load-fast-left": { source: "images", images: loadFrames.fast, frames: 4, mirror: true, contain: true },
+  "load-extreme-right": { source: "images", images: loadFrames.extreme, frames: 4, contain: true },
+  "load-extreme-left": { source: "images", images: loadFrames.extreme, frames: 4, mirror: true, contain: true },
   jumping: { source: "atlas", row: 4, frames: 5 },
   dragged: { source: "images", images: [dragged00, dragged01, dragged02, dragged03], frames: 4 },
   thrown: { source: "images", images: [thrown00, thrown01, thrown02, thrown03, thrown04, thrown05], frames: 6 },
   landing: { source: "images", images: [landing00, landing01, landing02, landing03], frames: 4 },
   "hard-impact": { source: "images", images: [hardImpact00], frames: 1 },
   focused: { source: "images", images: [focused00], frames: 1 },
+  waiting: { source: "atlas", row: 6, frames: 6 },
+  busy: { source: "atlas", row: 7, frames: 6 },
+  failed: { source: "atlas", row: 5, frames: 8 },
 };
 
 export interface PetSprite {
@@ -77,6 +122,7 @@ export function createPetSprite(): PetSprite {
   const render = (): void => {
     const definition = animations[animation];
     element.dataset.animation = animation;
+    element.style.transform = definition.source === "images" && definition.mirror ? "scaleX(-1)" : "";
     if (definition.source === "atlas") {
       element.style.backgroundImage = `url("${gamjabotAtlas}")`;
       element.style.backgroundSize = `${DISPLAY_ATLAS_WIDTH}px ${DISPLAY_ATLAS_HEIGHT}px`;
@@ -85,8 +131,8 @@ export function createPetSprite(): PetSprite {
     }
 
     element.style.backgroundImage = `url("${definition.images[frame]}")`;
-    element.style.backgroundSize = animation === "focused" ? "contain" : `${DISPLAY_CELL_WIDTH}px ${DISPLAY_CELL_HEIGHT}px`;
-    element.style.backgroundPosition = animation === "focused" ? "center bottom" : "0 0";
+    element.style.backgroundSize = animation === "focused" || definition.contain ? "contain" : `${DISPLAY_CELL_WIDTH}px ${DISPLAY_CELL_HEIGHT}px`;
+    element.style.backgroundPosition = animation === "focused" || definition.contain ? "center bottom" : "0 0";
   };
 
   render();

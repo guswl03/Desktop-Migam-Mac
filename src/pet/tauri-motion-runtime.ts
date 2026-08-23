@@ -29,6 +29,13 @@ import {
   type ThrowState,
 } from "./physics";
 import type { PetAnimation, PetSprite } from "./sprite";
+import type { SystemMetricsState } from "../contracts";
+import {
+  resourceIdleAnimation,
+  resourceMovementAnimation,
+  resourceSpeedMultiplier as speedForMetrics,
+  shouldRunContinuously,
+} from "./resource-response";
 
 const MOVEMENT_FPS = 30;
 const WALK_SPEED_PIXELS_PER_SECOND = 92;
@@ -49,6 +56,7 @@ interface WalkingMode {
   x: number;
   targetX: number;
   groundY: number;
+  bounds: PositionBounds;
 }
 
 interface DraggedMode {
@@ -134,8 +142,21 @@ export function startPetMotion(sprite: PetSprite): () => void {
   let interactionId = 0;
   let timerActive = false;
   let unlistenTimer: (() => void) | null = null;
+  let resourceSpeedMultiplier = 1;
+  let latestSystemMetrics: SystemMetricsState = {
+    cpuPercent: 0,
+    memoryPercent: 0,
+    mode: "off",
+  };
+  let lastAnimationFrameAt = performance.now();
 
-  const animationTimer = window.setInterval(() => sprite.advanceFrame(), 120);
+  const animationTimer = window.setInterval(() => {
+    const now = performance.now();
+    if (now - lastAnimationFrameAt >= 120 / resourceSpeedMultiplier) {
+      sprite.advanceFrame();
+      lastAnimationFrameAt = now;
+    }
+  }, 30);
 
   const setMode = (nextMode: RuntimeMode, animation: PetAnimation): void => {
     mode = nextMode;
@@ -243,14 +264,16 @@ export function startPetMotion(sprite: PetSprite): () => void {
     );
     if (mode !== idle) return;
 
+    const direction = targetX < safePosition.x ? "left" : "right";
     setMode(
       {
         kind: "walking",
         x: safePosition.x,
         targetX,
         groundY,
+        bounds,
       },
-      targetX < safePosition.x ? "running-left" : "running-right",
+      resourceMovementAnimation(latestSystemMetrics, direction),
     );
   };
 
@@ -262,7 +285,7 @@ export function startPetMotion(sprite: PetSprite): () => void {
       walking.x,
       walking.targetX,
       WALK_SPEED_PIXELS_PER_SECOND,
-      deltaSeconds,
+      deltaSeconds * resourceSpeedMultiplier,
     );
     if (mode !== walking) return;
 
@@ -272,7 +295,17 @@ export function startPetMotion(sprite: PetSprite): () => void {
     if (mode !== walking) return;
 
     if (Math.abs(walking.targetX - walking.x) <= ARRIVAL_TOLERANCE_PIXELS) {
-      setMode(idleMode(), "idle");
+      if (shouldRunContinuously(latestSystemMetrics)) {
+        walking.targetX = pickHorizontalTarget(
+          walking.x,
+          walking.bounds,
+          Math.random(),
+        );
+        const direction = walking.targetX < walking.x ? "left" : "right";
+        sprite.setAnimation(resourceMovementAnimation(latestSystemMetrics, direction));
+      } else {
+        setMode(idleMode(), "idle");
+      }
     }
   };
 
@@ -392,6 +425,30 @@ export function startPetMotion(sprite: PetSprite): () => void {
     }
   };
 
+  const applySystemMetrics = (metrics: SystemMetricsState): void => {
+    latestSystemMetrics = metrics;
+    resourceSpeedMultiplier = speedForMetrics(metrics);
+
+    if (timerActive) return;
+    if (mode.kind === "walking") {
+      const direction = mode.targetX < mode.x ? "left" : "right";
+      sprite.setAnimation(resourceMovementAnimation(metrics, direction));
+    } else if (mode.kind === "idle") {
+      if (shouldRunContinuously(metrics)) {
+        mode.untilMilliseconds = performance.now();
+      }
+      sprite.setAnimation(resourceIdleAnimation(metrics));
+    }
+  };
+
+  const pollSystemMetrics = (): void => {
+    void invoke<SystemMetricsState>("get_system_metrics")
+      .then(applySystemMetrics)
+      .catch(() => {
+        resourceSpeedMultiplier = 1;
+      });
+  };
+
   void invoke<TimerSnapshot>("get_timer_state").then(applyTimerState).catch(() => undefined);
   void listen<TimerSnapshot>("timer://state", ({ payload }) => applyTimerState(payload)).then(
     (unlisten) => {
@@ -399,6 +456,8 @@ export function startPetMotion(sprite: PetSprite): () => void {
       else unlisten();
     },
   );
+  pollSystemMetrics();
+  const systemMetricsTimer = window.setInterval(pollSystemMetrics, 1_000);
 
   void run().catch((error: unknown) => {
     setMode(idleMode(), "idle");
@@ -409,6 +468,7 @@ export function startPetMotion(sprite: PetSprite): () => void {
     active = false;
     interactionId += 1;
     window.clearInterval(animationTimer);
+    window.clearInterval(systemMetricsTimer);
     unlistenTimer?.();
   };
 }

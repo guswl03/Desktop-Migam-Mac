@@ -22,7 +22,10 @@ export interface InterventionRequest {
 
 export interface Settings {
   schemaVersion: number;
-  pet: { visualScalePercent: number };
+  pet: {
+    visualScalePercent: number;
+    resourceResponseMode: ResourceResponseMode;
+  };
   pomodoro: {
     focusMinutes: number;
     shortBreakMinutes: number;
@@ -33,6 +36,14 @@ export interface Settings {
     interventionEnabled: boolean;
     rules: DistractionRule[];
   };
+}
+
+export type ResourceResponseMode = "off" | "cpu" | "memory" | "combined";
+
+export interface SystemMetricsState {
+  cpuPercent: number;
+  memoryPercent: number;
+  mode: ResourceResponseMode;
 }
 
 export interface BootstrapState {
