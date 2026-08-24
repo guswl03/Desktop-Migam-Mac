@@ -9,9 +9,9 @@
 </p>
 
 <p align="center">
-  <a href="https://github.com/guswl03/Desktop-Migam-Mac/releases/download/v0.1.0/migam.desktop_0.1.0_aarch64.dmg"><strong>Apple Silicon용 DMG 다운로드</strong></a>
+  <a href="https://github.com/guswl03/Desktop-Migam-Mac/releases/download/v0.1.1/migam.desktop_0.1.1_aarch64.dmg"><strong>Apple Silicon용 DMG 다운로드</strong></a>
   ·
-  <a href="https://github.com/guswl03/Desktop-Migam-Mac/releases/tag/v0.1.0">v0.1.0 릴리즈 보기</a>
+  <a href="https://github.com/guswl03/Desktop-Migam-Mac/releases/tag/v0.1.1">v0.1.1 릴리즈 보기</a>
 </p>
 
 > [!NOTE]
@@ -19,12 +19,12 @@
 
 ## 바로 설치하기
 
-1. [migam desktop DMG 다운로드](https://github.com/guswl03/Desktop-Migam-Mac/releases/download/v0.1.0/migam.desktop_0.1.0_aarch64.dmg)를 누릅니다.
-2. 다운로드한 `migam.desktop_0.1.0_aarch64.dmg`를 엽니다.
+1. [migam desktop DMG 다운로드](https://github.com/guswl03/Desktop-Migam-Mac/releases/download/v0.1.1/migam.desktop_0.1.1_aarch64.dmg)를 누릅니다.
+2. 다운로드한 `migam.desktop_0.1.1_aarch64.dmg`를 엽니다.
 3. `migam desktop`을 **Applications** 폴더로 드래그합니다.
 4. Finder의 **응용 프로그램**에서 `migam desktop`을 실행합니다.
 
-다운로드가 시작되지 않으면 [v0.1.0 릴리즈 페이지](https://github.com/guswl03/Desktop-Migam-Mac/releases/tag/v0.1.0)의 **Assets**에서 DMG를 직접 내려받으세요.
+다운로드가 시작되지 않으면 [v0.1.1 릴리즈 페이지](https://github.com/guswl03/Desktop-Migam-Mac/releases/tag/v0.1.1)의 **Assets**에서 DMG를 직접 내려받으세요.
 
 ### macOS가 앱 실행을 차단한다면
 

@@ -9,12 +9,13 @@
 - [x] AX 일반 창 목록·모니터 배율/work area 좌표 어댑터와 포물선 창 오르기 이식
 - [x] 1% 희귀 사진·5회 클릭·34개 감자봇 비·자산 준비 fallback 이식
 - [x] macOS CI의 실제 `aarch64-apple-darwin` 컴파일과 unsigned DMG 생성 확인
+- [x] 사진 배달 캐릭터의 생성형 `blob:` 스프라이트를 CSP에서 허용하고 회귀 테스트 추가
 - [ ] M2/M3 Mac에서 권한·투명 창·다중 모니터·Dock·창 추적·항상 위 수동 검증
 
 macOS 네이티브·수동 게이트 전에는 이 단계를 완료로 표시하지 않는다.
 
 최종 갱신: 2026-08-24
-현재 단계: `v0.1.0` Apple Silicon DMG 정식 배포 완료, 실제 M2/M3 Mac 수동 검증 대기
+현재 단계: 사진 배달 캐릭터 표시 수정과 `v0.1.1` 배포 준비 완료, PR·main CI·DMG 자산 게시 대기
 전체 상태: 공통 프런트와 macOS 네이티브 구현, 로컬 자동 검사, `aarch64-apple-darwin` CI 및 GitHub Release 완료
 
 ## 단계별 상태
@@ -182,6 +183,7 @@ macOS 네이티브·수동 게이트 전에는 이 단계를 완료로 표시하
 | 2026-08-24 | 자동 사진 배달 ON/OFF·규칙 시간 하한 변경 후 전체 검사 | 통과 | 프런트 25개·Rust 43개, production build, rustfmt, Clippy 통과; Windows UI 수동 확인 필요 |
 | 2026-08-24 | macOS 창 오르기·희귀 사진 이벤트 이식 | 통과 | 프런트 48개·Rust 46개·typecheck·production build·rustfmt·Clippy 통과; `aarch64-apple-darwin` CI와 실제 Mac 수동 확인 필요 |
 | 2026-08-24 | macOS `v0.1.0` 릴리즈 | 통과 | 프런트 48개·Rust 46개·typecheck·production build·rustfmt·Clippy와 main의 Check·macOS validation 통과; Apple Silicon DMG 게시 |
+| 2026-08-24 | 사진 배달 캐릭터 CSP 수정·`v0.1.1` 준비 | 로컬 통과 | `img-src`에 `blob:` 허용, 회귀 테스트 Red→Green, 프런트 48개·Rust 47개·typecheck·production build·rustfmt·Clippy 통과; macOS CI·DMG 대기 |
 
 | 시각 | 명령/검사 | 결과 | 메모 |
 |---|---|---|---|
@@ -278,10 +280,10 @@ macOS 네이티브·수동 게이트 전에는 이 단계를 완료로 표시하
 ## 마지막 인수인계
 
 ```text
-현재 상태: `v0.1.0`을 커밋 `dd57e4d`에서 정식 게시하고 Apple Silicon DMG와 README 직접 설치 안내 연결 완료
-마지막 성공 검사: 2026-08-24 프런트 48개·Rust 46개·typecheck·fmt·Clippy·production build 및 main Check·macOS validation 통과
-완료한 기능: AX 창 목록/좌표 어댑터, 느린 포물선 점프·980ms 넘어짐·창 추적/낙하·항상 위, 1% 희귀 사진·34개 감자봇 비·준비/fallback, 로프 보존, `v0.1.0` DMG 배포
-다음으로 할 일: 실제 M2/M3 Mac에서 설치/Gatekeeper, Accessibility 권한, Retina/외장 모니터, Dock 위치, 창 이동·최소화·종료, clipping, 희귀 이벤트와 장시간 동작 수동 검증
-알려진 위험: Windows 호스트에서는 `cfg(target_os = "macos")` 내부의 AppKit/AX 호출과 macOS Tauri 좌표/Z-order를 실행 검증할 수 없음
+현재 상태: 사진 배달 캐릭터 CSP 수정과 v0.1.1 버전·README 준비 완료, PR·main CI·DMG 자산·정식 게시 대기
+마지막 성공 검사: 2026-08-24 프런트 48개·Rust 47개·typecheck·production build·fmt·Clippy 통과
+완료한 기능: `img-src blob:` 허용과 설정 회귀 테스트, v0.1.1 패키지 버전·README 직접 설치 링크 준비
+다음으로 할 일: PR·main의 Check·macOS validation과 unsigned DMG 빌드 통과 후 v0.1.1 자산 게시 및 실제 M2/M3 Mac에서 표시 확인
+알려진 위험: Windows 호스트에서는 실제 macOS WebView·AppKit/AX 동작과 DMG를 생성할 수 없고 코드 서명·공증도 없음
 실행/테스트 방법: `docs/19-macos-development.md`의 Mac 명령과 수동 검증표 사용
 ```
