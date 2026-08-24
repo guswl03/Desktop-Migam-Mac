@@ -15,7 +15,19 @@
 - 시스템 사용률은 `sysinfo` 기반이며 긴급 단축키는 `Command+Shift+F12`이다.
 - Tauri macOS 14 설정, `.icns`, ad-hoc 빌드 명령과 게시 없는 macOS CI를 추가했다.
 - Windows 호스트에서 프런트 48개·Rust 46개 테스트, TypeScript 검사, production build, rustfmt와 Clippy가 통과했다.
-- macOS CI와 실제 M2/M3 Mac 수동 검증은 아직 완료되지 않았다.
+- GitHub macOS CI에서 `aarch64-apple-darwin` 테스트·Clippy·unsigned 앱/DMG 빌드가 통과했다.
+- `v0.1.0`을 커밋 `dd57e4d`에서 정식 게시하고 Apple Silicon DMG와 README 직접 다운로드·설치 안내를 연결했다.
+- 실제 M2/M3 Mac 수동 검증은 아직 완료되지 않았다.
+
+## v0.1.0 릴리즈 상태
+
+- 릴리즈: `https://github.com/guswl03/Desktop-Migam-Mac/releases/tag/v0.1.0`
+- 대상 커밋: `dd57e4dd5e7c3095b869c3b218117e0414badbf9`
+- 자산: `migam.desktop_0.1.0_aarch64.dmg` (18,152,301 bytes)
+- SHA-256: `71d4a392219afe2aff26ee88342d7b40357653d7da62325a29ba3075aef06fb7`
+- 로컬 검증: 프런트 48개, Rust 46개, TypeScript, production build, rustfmt, Clippy `-D warnings` 통과.
+- GitHub 검증: 병합 후 main의 Check와 macOS validation 통과, README 직접 다운로드 URL HTTP 200과 자산 크기 확인.
+- 배포 제한: Apple 코드 서명과 공증이 없는 빌드이므로 최초 실행 시 Gatekeeper 허용 절차가 필요하다.
 
 ## 최근 창 오르기·희귀 사진 이벤트 이식
 
@@ -29,7 +41,7 @@
 - 사진과 끌기 스프라이트 decode가 끝난 뒤에만 원래 펫을 숨긴다. 투명화 실패 시 원본 끌기 스트립을 사용한다.
 - 자동 검사: 프런트 48개, Rust 46개, TypeScript, Vite production build, rustfmt, Clippy `-D warnings` 통과. Windows 호스트라 macOS 전용 분기의 실제 컴파일·실행은 CI 또는 실제 Mac에서 확인해야 한다.
 
-다음 작업은 GitHub macOS CI에서 `aarch64-apple-darwin` 컴파일을 확인한 뒤, 실제 M2/M3 Mac에서 Accessibility 권한·Retina/외장 모니터 좌표·Dock 위치별 작업 영역·창 이동/최소화/종료 추적·항상 위·넘어짐 clipping·희귀 이벤트를 수동 검증하는 것이다.
+다음 작업은 실제 M2/M3 Mac에서 DMG 설치·Gatekeeper 실행, Accessibility 권한·Retina/외장 모니터 좌표·Dock 위치별 작업 영역·창 이동/최소화/종료 추적·항상 위·넘어짐 clipping·희귀 이벤트와 장시간 동작을 수동 검증하는 것이다.
 
 ## 현재 목표
 
