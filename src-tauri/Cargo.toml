@@ -15,7 +15,7 @@ tauri-build = { version = "2.5.0", features = [] }
 [dependencies]
 serde = { version = "1.0", features = ["derive"] }
 serde_json = "1.0"
-tauri = { version = "2.8.0", features = ["tray-icon"] }
+tauri = { version = "2.8.0", features = ["tray-icon", "macos-private-api"] }
 thiserror = "2.0"
 getrandom = "0.3"
 sysinfo = "0.37"
@@ -23,5 +23,4 @@ sysinfo = "0.37"
 [target.'cfg(target_os = "macos")'.dependencies]
 axuielement = "0.9.1"
 objc2-app-kit = { version = "0.3.2", features = ["NSRunningApplication", "NSWorkspace", "libc"] }
-tauri = { version = "2.8.0", features = ["macos-private-api"] }
 tauri-plugin-global-shortcut = "2"
