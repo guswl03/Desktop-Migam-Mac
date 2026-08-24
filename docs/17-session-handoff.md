@@ -4,6 +4,14 @@
 
 이 문서는 다음 작업 세션이 가장 먼저 확인하는 단일 인수인계 기록이다. 작업을 끝낼 때마다 오래된 내용을 남기지 말고 현재 상태로 갱신한다.
 
+## v0.1.1 배포 준비
+
+- Canvas에서 배경 제거한 사진 배달 캐릭터가 `blob:` URL을 사용하지만 CSP `img-src`가 이를 허용하지 않아 사진만 보이던 원인을 수정했다.
+- CSP에는 기존 출처를 유지한 채 `blob:`만 추가했고, 설정이 다시 빠지면 실패하는 Rust 회귀 테스트를 추가했다.
+- 앱 버전과 README 다운로드 링크를 `0.1.1`/`v0.1.1`로 동기화했다.
+- 로컬 검증: 프런트 48개, Rust 47개, TypeScript, production build, rustfmt, Clippy `-D warnings` 통과.
+- 남은 배포 게이트: PR·main의 `aarch64-apple-darwin` 테스트·Clippy·unsigned DMG 빌드 통과 및 DMG 자산 확보.
+
 ## macOS 전용 이식 상태
 
 2026-08-24에 제품 타깃을 Apple Silicon M2 이상·macOS 14 이상으로 전환했다.
