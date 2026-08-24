@@ -40,12 +40,11 @@ fn status(_prompt: bool) -> AccessibilityPermissionState {
     AccessibilityPermissionState::Unavailable
 }
 
-#[cfg(test)]
+#[cfg(all(test, not(target_os = "macos")))]
 mod tests {
     use super::*;
 
     #[test]
-    #[cfg(not(target_os = "macos"))]
     fn permission_is_unavailable_off_macos() {
         assert_eq!(
             AccessibilityPermissionService.status(),

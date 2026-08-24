@@ -83,7 +83,9 @@ mod platform {
                 continue;
             }
 
-            let app_element = AXUIElement::from_pid(pid);
+            let Some(app_element) = AXUIElement::from_pid(pid) else {
+                continue;
+            };
             let Ok(windows) = app_element.element_array_attribute("AXWindows") else {
                 continue;
             };
