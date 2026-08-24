@@ -15,7 +15,9 @@ use crate::{
         pomodoro::{PomodoroEvent, PomodoroPhase},
         settings::{ResourceResponseMode, Settings},
     },
-    infrastructure::macos::AccessibilityPermissionState,
+    infrastructure::macos::{
+        climbable_windows, AccessibilityPermissionState, WindowSurface, WindowSurfaceContext,
+    },
 };
 
 #[derive(Serialize)]
@@ -101,6 +103,79 @@ pub fn get_system_metrics(state: State<'_, AppState>) -> Result<SystemMetricsSta
         memory_percent: metrics.memory_percent,
         mode,
     })
+}
+
+#[tauri::command]
+pub fn get_climbable_windows(app: AppHandle) -> Vec<WindowSurface> {
+    let Some(pet) = app.get_webview_window("pet") else {
+        return Vec::new();
+    };
+    let Ok(Some(monitor)) = pet.current_monitor() else {
+        return Vec::new();
+    };
+    let work_area = monitor.work_area();
+    climbable_windows(WindowSurfaceContext {
+        work_x: work_area.position.x,
+        work_y: work_area.position.y,
+        work_width: work_area.size.width,
+        work_height: work_area.size.height,
+        scale_factor: monitor.scale_factor(),
+    })
+}
+
+fn climb_rope_rect(x: i32, top: i32, bottom: i32, side: &str) -> (i32, i32, u32) {
+    let normalized_top = top.min(bottom);
+    let normalized_bottom = bottom.max(top);
+    let height = (normalized_bottom - normalized_top).clamp(24, 4096) as u32;
+    let window_x = if side == "left" { x - 16 } else { x - 160 };
+    (window_x, normalized_top, height)
+}
+
+#[derive(Clone, Serialize)]
+#[serde(rename_all = "camelCase")]
+struct ClimbRopeState<'a> {
+    progress: f64,
+    side: &'a str,
+}
+
+#[tauri::command]
+pub fn show_climb_rope(
+    app: AppHandle,
+    x: i32,
+    top: i32,
+    bottom: i32,
+    progress: f64,
+    side: String,
+) -> Result<(), String> {
+    if !matches!(side.as_str(), "left" | "right") {
+        return Err("invalid climb rope side".to_owned());
+    }
+    let rope = app
+        .get_webview_window("climb-rope")
+        .ok_or_else(|| "climb rope window is unavailable".to_owned())?;
+    let (window_x, window_y, height) = climb_rope_rect(x, top, bottom, &side);
+    rope.set_position(tauri::PhysicalPosition::new(window_x, window_y))
+        .map_err(|_| "climb rope could not be positioned".to_owned())?;
+    rope.set_size(tauri::PhysicalSize::new(176, height))
+        .map_err(|_| "climb rope could not be resized".to_owned())?;
+    rope.show()
+        .map_err(|_| "climb rope could not be shown".to_owned())?;
+    rope.emit(
+        "climb-rope://state",
+        ClimbRopeState {
+            progress: progress.clamp(0.0, 1.0),
+            side: &side,
+        },
+    )
+    .map_err(|_| "climb rope animation could not be updated".to_owned())
+}
+
+#[tauri::command]
+pub fn hide_climb_rope(app: AppHandle) -> Result<(), String> {
+    app.get_webview_window("climb-rope")
+        .ok_or_else(|| "climb rope window is unavailable".to_owned())?
+        .hide()
+        .map_err(|_| "climb rope could not be hidden".to_owned())
 }
 
 fn dispatch_timer(
@@ -379,6 +454,9 @@ pub fn resume_pet(app: AppHandle, state: State<'_, AppState>) -> Result<(), Stri
     }
     if let Some(window) = app.get_webview_window("pet") {
         window
+            .set_always_on_top(true)
+            .map_err(|_| "pet window could not be kept above desktop windows".to_owned())?;
+        window
             .show()
             .map_err(|_| "pet window could not be shown".to_owned())?;
     }
@@ -441,20 +519,26 @@ pub fn start_photo_delivery(
         return Ok(false);
     }
     prepare_photo_delivery_overlay(&app)?;
-    if let Some(pet) = app.get_webview_window("pet") {
-        let _ = pet.hide();
-    }
     delivery
         .show()
         .map_err(|_| "photo delivery could not be shown".to_owned())?;
     if delivery.emit("photo://deliver", ()).is_err() {
         let _ = delivery.hide();
         if let Some(pet) = app.get_webview_window("pet") {
+            let _ = pet.set_always_on_top(true);
             let _ = pet.show();
         }
         return Err("photo delivery could not be started".to_owned());
     }
     Ok(true)
+}
+
+#[tauri::command]
+pub fn begin_photo_delivery_motion(app: AppHandle) -> Result<(), String> {
+    app.get_webview_window("pet")
+        .ok_or_else(|| "pet window is unavailable".to_owned())?
+        .hide()
+        .map_err(|_| "pet window could not be hidden".to_owned())
 }
 
 #[tauri::command]
@@ -500,6 +584,8 @@ pub fn settle_photo_delivery(
         .set_ignore_cursor_events(false)
         .map_err(|_| "delivered photo could not receive pointer input".to_owned())?;
     if !state.emergency_stopped.load(Ordering::SeqCst) {
+        pet.set_always_on_top(true)
+            .map_err(|_| "pet window could not be kept above desktop windows".to_owned())?;
         pet.show()
             .map_err(|_| "pet window could not be restored".to_owned())?;
     }
@@ -517,11 +603,18 @@ pub fn finish_photo_delivery(app: AppHandle, state: State<'_, AppState>) -> Resu
     }
     if !state.emergency_stopped.load(Ordering::SeqCst) {
         if let Some(pet) = app.get_webview_window("pet") {
+            pet.set_always_on_top(true)
+                .map_err(|_| "pet window could not be kept above desktop windows".to_owned())?;
             pet.show()
                 .map_err(|_| "pet window could not be restored".to_owned())?;
         }
     }
     Ok(())
+}
+
+#[tauri::command]
+pub fn expand_photo_delivery_for_rain(app: AppHandle) -> Result<(), String> {
+    prepare_photo_delivery_overlay(&app)
 }
 
 pub fn place_timer_bubble(app: &AppHandle) -> Result<(), String> {
@@ -773,10 +866,17 @@ pub fn quit_application(app: AppHandle) {
 }
 #[cfg(test)]
 mod gamcha_notice_position_tests {
-    use super::gamcha_notice_desired_y;
+    use super::{climb_rope_rect, gamcha_notice_desired_y};
 
     #[test]
     fn anchors_the_reward_notice_at_the_same_pet_offset_as_the_timer() {
         assert_eq!(gamcha_notice_desired_y(700, 82), 630);
+    }
+
+    #[test]
+    fn centers_and_normalizes_the_climb_rope_window() {
+        assert_eq!(climb_rope_rect(734, 300, 940, "right"), (574, 300, 640));
+        assert_eq!(climb_rope_rect(734, 300, 940, "left"), (718, 300, 640));
+        assert_eq!(climb_rope_rect(734, 400, 390, "right"), (574, 390, 24));
     }
 }

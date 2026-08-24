@@ -14,10 +14,22 @@
 - 권한이 없으면 집중 개입 저장을 off로 정규화하며 다른 기능은 유지한다.
 - 시스템 사용률은 `sysinfo` 기반이며 긴급 단축키는 `Command+Shift+F12`이다.
 - Tauri macOS 14 설정, `.icns`, ad-hoc 빌드 명령과 게시 없는 macOS CI를 추가했다.
-- Windows 호스트에서 TypeScript 검사와 Rust 45개 테스트가 통과했다.
+- Windows 호스트에서 프런트 48개·Rust 46개 테스트, TypeScript 검사, production build, rustfmt와 Clippy가 통과했다.
 - macOS CI와 실제 M2/M3 Mac 수동 검증은 아직 완료되지 않았다.
 
-다음 작업은 GitHub macOS CI 결과의 컴파일 오류를 수정한 뒤 `docs/19-macos-development.md`의 실제 Mac 검증표를 수행하는 것이다.
+## 최근 창 오르기·희귀 사진 이벤트 이식
+
+- Windows 기준 커밋 `1cedf49`의 창 오르기와 희귀 사진 동작을 현재 macOS 구조에 맞춰 이식했다.
+- `NSWorkspace`와 `AXUIElement`로 일반 앱의 표시 중인 표준 창을 열거한다. 자기 프로세스, 숨김·종료·최소화 앱/창과 작은 보조 창은 제외하며 제목이나 프로세스명은 프런트로 전달하지 않는다.
+- 현재 펫 모니터의 Tauri physical work area와 scale factor를 기준으로 AX 포인트 좌표를 변환하고, 해당 작업 영역과 교차하는 창만 반환한다. Dock과 메뉴바 영역은 기존 work area 바닥 계산에서 제외된다.
+- 펫은 창 벽 충돌 시 로프 없이 높이별 1.1~2.2초 포물선 점프로 창 상단에 착지하고, 약 980ms 철퍼덕 연출 뒤 창 상단을 새 바닥으로 걷는다. 받침 창의 이동·크기 변경을 추적하며 창이 사라지거나 최소화되면 기존 중력 낙하로 전환한다.
+- 넘어짐은 몸 중앙 회전축과 축소 구간으로 펫·코스튬이 128×128 펫 창 경계에 잘리지 않게 했고, 펫 창은 시작·복원 시와 실행 중 주기적으로 항상 위 상태를 재확인한다.
+- 로프 창·렌더러·스프라이트 자산과 관련 코드는 향후 선택 동작용으로 유지하지만 자동 창 오르기 경로에서는 호출하지 않는다.
+- `real-heogeodeongseu.png`를 정확히 1% 분기로 추가했다. 희귀 사진은 X가 없고 사진 5회 클릭 시 현재 모니터 작업 영역 전체에서 감자봇 34개가 약 4.2초 동안 비처럼 내린 뒤 자동 종료한다.
+- 사진과 끌기 스프라이트 decode가 끝난 뒤에만 원래 펫을 숨긴다. 투명화 실패 시 원본 끌기 스트립을 사용한다.
+- 자동 검사: 프런트 48개, Rust 46개, TypeScript, Vite production build, rustfmt, Clippy `-D warnings` 통과. Windows 호스트라 macOS 전용 분기의 실제 컴파일·실행은 CI 또는 실제 Mac에서 확인해야 한다.
+
+다음 작업은 GitHub macOS CI에서 `aarch64-apple-darwin` 컴파일을 확인한 뒤, 실제 M2/M3 Mac에서 Accessibility 권한·Retina/외장 모니터 좌표·Dock 위치별 작업 영역·창 이동/최소화/종료 추적·항상 위·넘어짐 clipping·희귀 이벤트를 수동 검증하는 것이다.
 
 ## 현재 목표
 
