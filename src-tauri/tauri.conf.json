@@ -10,6 +10,7 @@
     "frontendDist": "../dist"
   },
   "app": {
+    "macOSPrivateApi": true,
     "windows": [
       {
         "label": "pet",
@@ -113,6 +114,21 @@
         "title": "migam desktop · Photo Delivery",
         "width": 640,
         "height": 360,
+        "visible": false,
+        "decorations": false,
+        "transparent": true,
+        "alwaysOnTop": true,
+        "skipTaskbar": true,
+        "focus": false,
+        "focusable": false,
+        "resizable": false,
+        "shadow": false
+      },
+      {
+        "label": "climb-rope",
+        "title": "migam desktop · Climb Rope",
+        "width": 176,
+        "height": 120,
         "visible": false,
         "decorations": false,
         "transparent": true,
